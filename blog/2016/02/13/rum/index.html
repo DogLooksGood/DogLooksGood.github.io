@@ -64,6 +64,76 @@
 </div>
 </div>
 
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2">Rum API</h2>
+<div class="outline-text-2" id="text-orgheadline2">
+<p>
+Rum提供一个宏 <code>defc</code> (define component的缩写):
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(rum/defc name doc-string? [&lt; mixins+]? [params*] render-body+)
+</pre>
+</div>
+<p>
+<code>defc</code> 定义一个顶级函数接受一组参数 <code>params*</code>,返回一个会按照 <code>render-body</code> 中指定方式渲染的React组件.
+</p>
+
+<p>
+<code>defc</code> 的实现原理如下:
+</p>
+<ul class="org-ul">
+<li>定义一个render函数,把 <code>render-body</code> 显式的放入 <code>do</code> 中,并用 <code>sablono.core/html</code> 宏来渲染.</li>
+<li>通过render函数,和指定的mixin来创建一个React类.</li>
+<li>通过这个类,生成构造函数 fn [params] -&gt; ReactElement</li>
+<li>定义一个顶级的变量 <code>name</code> ,指向构造函数.</li>
+</ul>
+
+<p>
+当调用的时候, <code>name</code> 函数会创建一个React元素. <code>params</code> 参数会被传入,所以在 <code>render-body</code> 中可以被使用.
+</p>
+
+<p>
+用 <code>rum.core/mount</code> 来挂载这个组件:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(run/mount element dom-node)
+</pre>
+</div>
+<p>
+<code>mount</code> 会返回被挂载的元素,使用同样的参数多次调用 <code>mount</code> 是安全的.
+</p>
+
+<p>
+需要注意的是, <code>mount</code> 并不会让组件可以自动被更新,如果有必要,需要通过代码或者mixin来实现.
+可以通过再次挂载的方式:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(add-watch state :render
+  (fn [_ _ _ _]
+    (rum/mount element node)))
+</pre>
+</div>
+<p>
+或者调用 <code>request-render</code> 函数:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(let [component (rum/mount element dom-node)]
+  (add-watch state :render
+    (fn [_ _ _ _]
+      (rum/request-render component))))
+</pre>
+</div>
+<p>
+<code>request-render</code> 并不会立刻执行渲染,而是讲你的组件放入渲染队列,在 <code>requestAnimationFrame</code> 回调时,进行渲染
+需要重新渲染时, <code>request-render</code> 是更推荐的方式.
+</p>
+</div>
+</div>
+
 </div>
 </div>
     <div>

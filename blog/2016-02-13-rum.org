@@ -23,4 +23,40 @@
   (rum/mount (label 5 "abc") js/document.body)
 #+END_SRC
 
+* Rum API
+Rum提供一个宏 ~defc~ (define component的缩写):
+#+BEGIN_SRC clojure
+  (rum/defc name doc-string? [< mixins+]? [params*] render-body+)
+#+END_SRC
+~defc~ 定义一个顶级函数接受一组参数 ~params*~,返回一个会按照 ~render-body~ 中指定方式渲染的React组件.
 
+~defc~ 的实现原理如下:
+- 定义一个render函数,把 ~render-body~ 显式的放入 ~do~ 中,并用 ~sablono.core/html~ 宏来渲染.
+- 通过render函数,和指定的mixin来创建一个React类.
+- 通过这个类,生成构造函数 fn [params] -> ReactElement
+- 定义一个顶级的变量 ~name~ ,指向构造函数.
+
+当调用的时候, ~name~ 函数会创建一个React元素. ~params~ 参数会被传入,所以在 ~render-body~ 中可以被使用.
+
+用 ~rum.core/mount~ 来挂载这个组件:
+#+BEGIN_SRC clojure
+  (run/mount element dom-node)
+#+END_SRC
+~mount~ 会返回被挂载的元素,使用同样的参数多次调用 ~mount~ 是安全的.
+
+需要注意的是, ~mount~ 并不会让组件可以自动被更新,如果有必要,需要通过代码或者mixin来实现.
+可以通过再次挂载的方式:
+#+BEGIN_SRC clojure
+  (add-watch state :render
+    (fn [_ _ _ _]
+      (rum/mount element node)))
+#+END_SRC
+或者调用 ~request-render~ 函数:
+#+BEGIN_SRC clojure
+  (let [component (rum/mount element dom-node)]
+    (add-watch state :render
+      (fn [_ _ _ _]
+        (rum/request-render component))))
+#+END_SRC
+~request-render~ 并不会立刻执行渲染,而是讲你的组件放入渲染队列,在 ~requestAnimationFrame~ 回调时,进行渲染
+需要重新渲染时, ~request-render~ 是更推荐的方式.
