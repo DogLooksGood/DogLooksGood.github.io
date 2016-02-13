@@ -1,0 +1,26 @@
+#+TITLE: Rum - 一个简单,灵活,可扩展的ClojureScript的React实现
+#+DATE: 2016-02-13
+#+author:      DogLooksGood
+#+EMAIL:       DogLooksGood@localhost
+#+URI:         /blog/%y/%m/%d/rum
+#+KEYWORDS:    clojure
+#+TAGS:        clojure
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: Rum的学习笔记
+
+* 使用Rum
+- 添加依赖 ~[rum "0.6.0"]~
+- ~(require '[rum.core :as rum])~
+简单的定义组件,初始化,并挂载到页面上.
+#+BEGIN_SRC clojure
+  (ns example
+    (:require [rum.core :as rum]))
+
+  (rum/defc label [n text]
+    [:.label (repeat n text)])
+
+  (rum/mount (label 5 "abc") js/document.body)
+#+END_SRC
+
+
