@@ -48,7 +48,7 @@ p {
 h1, h2, h3 {
     position: relative;
     margin: 30px 0 20px;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     line-height: 1.1;
     color: #111;
@@ -93,7 +93,9 @@ hr {
 hr:after {
     display: block;
     margin: 20px 0;
-    content: "----------------------------------------------------------------";
+    overflow: hidden;
+    white-space: nowrap;
+    content: "-----------------------------------------------------------------------------------";
     color: #ccc;
 }
 ul, ol {
@@ -106,10 +108,12 @@ code, pre {
 code {
     color: #d14;
 }
+/*
 code:before, code:after {
     content: "=";
     color: #ccc;
 }
+*/
 pre {
     display: block;
     margin: 0 0 14px;
@@ -179,8 +183,9 @@ table th.right, table td.right {
 }
 .masthead:after {
     display: block;
-    content: '--------------------------------------------------';
-    white-space:nowrap;
+    overflow: hidden;
+    white-space: nowrap;
+    content: "-----------------------------------------------------------------------------------";
     margin: 10px 0;
     color: #ccc;
 }
@@ -235,7 +240,8 @@ table th.right, table td.right {
     float: right;
     top: 0px;
     right: 0px;
-    width: 200px;
+    width: 180px;
+    height: 180px;
     background-color: #fff;
 }
 /* post */
@@ -244,7 +250,9 @@ table th.right, table td.right {
 }
 .post:after {
     display: block;
-    content: "----------------------------------------------------------------";
+    overflow: hidden;
+    white-space: nowrap;
+    content: "-----------------------------------------------------------------------------------";
     color: #ccc;
 }
 .post img {
@@ -287,7 +295,9 @@ table th.right, table td.right {
     content: "\2223 \00a0";
 }
 .post-meta:after {
-    content: "----------------------------------------------------------------";
+    overflow: hidden;
+    white-space: nowrap;
+    content: "-----------------------------------------------------------------------------------";
     display: block;
     margin-top: -1px;
     color: #ccc;
@@ -296,7 +306,7 @@ table th.right, table td.right {
 /* table of content */
 #table-of-contents {
     position: fixed;
-    right: 0em;
+    left: 0em;
     top: 0em;
     border:1px solid #e1e1e8;
     -webkit-box-shadow: 0 0 1em #777777;
