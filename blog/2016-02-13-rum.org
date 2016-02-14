@@ -58,5 +58,111 @@ Rum提供一个宏 ~defc~ (define component的缩写):
       (fn [_ _ _ _]
         (rum/request-render component))))
 #+END_SRC
-~request-render~ 并不会立刻执行渲染, 而是将你的组件放入渲染队列, 在 ~requestAnimationFrame~ 回调时, 进行渲染.
+~request-render~ 并不会立刻执行渲染, 而是将你的组件放入渲染队列, 
+在 ~requestAnimationFrame~ 回调时, 进行渲染.
 需要重新渲染时, ~request-render~ 是更推荐的方式.
+
+* Mixins
+Rum提供了一些mixins用来模拟 ~quiecent~, ~om~, ~reagent~ 中的一些功能. 
+编写自己的mixin也是非常容易的.
+
+~rum.core/static~ 会检查组件的参数是否变化过(按照Clojure的 ~-equiv~ 语意), 
+如果没有产生变化,就避免重绘:
+
+#+BEGIN_SRC clojure
+  (rum/defc label < rum/static [n text]
+    [:.label (repeat n text)])
+
+  (rum/mount (label 1 "abc") body)
+  (rum/mount (label 1 "abc") body)        ; 不会重绘
+  (rum/mount (label 1 "xyc") body)        ; 会重绘
+#+END_SRC
+
+~rum.core/local~ 创建一个atom作为组件级的状态. 当你使用 ~swap!~ 或者 ~reset!~ 修改这个atom的时候,
+组件会被自动重绘. 可以通过 ~:rum/local~ 这个key来获取到这个atom:
+
+#+BEGIN_SRC clojure
+  (rum/defcs stateful < (rum/local 0) [state title]
+    (let [local (:rum/local state)]
+      [:div
+       {:on-click (fn [_] (swap! local inc))}
+       title ": " @local]))
+
+  (rum/mount (stateful "Clicks count") js/document.body)
+#+END_SRC
+
+注意, 我们使用 ~defcs~ 代替 ~defc~ , 会在 ~render~ 的第一个参数得到state. 
+另外需要注意, ~rum.core/local~ 并不是一个mixin的值, 而是一个生成器函数.
+它接受一个初始值,返回一个mixin.
+
+~rum.core/reactive~ 会创建一个"反应性"的组件, 它会追踪所有在 ~render~ 函数中的引用.
+在这些引用的值改变的时候, 会自动更新组件:
+
+#+BEGIN_SRC clojure
+  (def color (atom "#cc3333"))
+  (def text (atom "Hello"))
+
+  (rum/defc label < rum/reactive []
+    [:.label {:style {:color (rum/react color)}}
+     (rum/react text)])
+
+  (rum/mount (label) js/document.body)
+  (reset! text "Good Bye")                ; 会造成重绘
+  (reset! color "#000")                   ; 同样重绘
+#+END_SRC
+
+~rum.core/react~ 函数的功能, 在这个例子中就相当于 ~deref~, 并且会观察这些引用.
+
+最后, ~rum.core/cursored~, 会追踪所有被作为参数传入的引用:
+
+#+BEGIN_SRC clojure
+  (rum/defc label < rum/cursored [color text]
+    [:.label {:style {:color @color}} @text])
+#+END_SRC
+
+需要注意, ~cursored~ mixin, 创建被动的组件: 对于它自己对引用产生的变化, 不会有反应.
+而且它只会在被父组件重新创建的时候, 比较这些参数的值. 另外, ~rum.core/cursored-watch~
+mixin会对参数表中, 所有 ~IWatchable~ 的参数进行变化的观察.
+
+#+BEGIN_SRC clojure
+  (rum/defc body < rum/cursored rum/cursored-watch [color text]
+    (label color text))
+
+  (rum/mount (body color text) js/document.body)
+
+  (reset! text "Good bye")                ; 会重绘body和label
+  (reset! color "#000")                   ; 同样的
+#+END_SRC
+
+Rum也提供cursor, 可以将atom树中的子树, 作为类似atom的结构提供出来:
+
+#+BEGIN_SRC clojure
+  (def state (atom {:color "#cc3333"
+                    :label1 "Hello"
+                    :label2 "Goodbye"}))
+
+  (rum/defc label < rum/cursored [color text]
+    [:.label {:style {:color @color}} @text])
+
+  (rum/defc body < rum/cursored rum/cursored-watch [state]
+    [:div
+     (label (rum/curosr state [:color]) (rum/cursor state [:label1]))
+     (label (rum/curosr state [:color]) (rum/cursor state [:label2]))])
+
+  ;; 只会重绘第二个label
+  (swap! state assoc :label2 "Good bye")
+
+  ;; 两个label都会被重绘
+  (swap! state assoc :color "#000")
+
+  ;; cursor可以像atom一样,被swap!和reset!
+  (reset! (rum/cursor state [:label1]) "Hi")
+#+END_SRC
+
+cursor实现了 ~IAtom~ 和 ~IWatchable~ , 接口的实现使其可以替换atom中对应的内容.
+cursor可以被使用在 ~reactive~ 的组件中.
+
+Rum之美在于你可以自己组合mixin, 在UI树中, 你可以使用完全不同的类. 你可以在顶级使用 ~reactive~ 组件,
+里面是 ~static~ 的组件, 接着是每一秒都更新的组件, 再里面是一个 ~cursored~ 组件. 强大而简单.
+
+    未完待续
