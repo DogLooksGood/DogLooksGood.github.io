@@ -165,4 +165,104 @@ cursor可以被使用在 ~reactive~ 的组件中.
 Rum之美在于你可以自己组合mixin, 在UI树中, 你可以使用完全不同的类. 你可以在顶级使用 ~reactive~ 组件,
 里面是 ~static~ 的组件, 接着是每一秒都更新的组件, 再里面是一个 ~cursored~ 组件. 强大而简单.
 
-    未完待续
+* Rum 组件模型
+rum会定义自己的类和组件, 在里面包含了React的类和组件.
+
+rum中的每一个组件, 都有一个关联的state. state的结构就是一个CLJS的map:
+- ~:rum/react-component~ 对应React的组件/元素
+- ~:rum/id~ 唯一的组件ID
+- 所有的mixin都会使用他们内部的标记
+- 任何你放入这里的东西(可以随意将任何东西放到这个里面)
+
+??? 这里并不是很清楚
+当前状态的引用保存在使用 ~volatile!~ 打包的值, 放在 ~state[":rum/state"]~.
+高效的state是可变的, 但是组件中并不会直接修改他们, 取而代之, 通过所有的生命周期方法来返回state.
+
+类定义了组件的行为, 包括render函数, 类是通过mixin来创建的.
+
+mixin是构建其他组件的基础组件, 每一个mixin都是一个map, 里面包含一下的一个或者多个函数.
+
+#+BEGIN_SRC clojure
+  { :init                 ;; state, props     ⇒ state
+    :will-mount           ;; state            ⇒ state
+    :did-mount            ;; state            ⇒ state
+    :transfer-state       ;; old-state, state ⇒ state
+    :should-update        ;; old-state, state ⇒ boolean
+    :will-update          ;; state            ⇒ state
+    :render               ;; state            ⇒ [pseudo-dom state]
+    :wrap-render          ;; render-fn        ⇒ render-fn
+    :did-update           ;; state            ⇒ state
+    :will-unmount         ;; state            ⇒ state 
+    :child-context        ;; state            ⇒ child-context }
+#+END_SRC
+
+为组件的类定义任意的属性和方法, 使用 ~:class-properties~ map:
+
+#+BEGIN_SRC clojure
+  {:class-properties { ... }}
+#+END_SRC
+
+想象一下, 一个类通过N个mixin构成, 当React中的生命周期事件产生的时候(例如: ComponentDidMount),
+所有的 ~:did-mount~ 会被按照mixin出现的从前到后的顺序被调用. 通过他们来返回初始化的状态.
+类似的, 多个组件中的 ~context~ map会被合并成一个.
+
+render的模型不同, 这里必须只有一个单独的 ~:render~ 函数, 接受state, 返回dom的vector和新的状态.
+如果mixin想修改render的行为, 它应该提供 ~:wrap-render~ 函数, 这些函数会被从左到右调用.
+举例, ~:render~ 被作为第一个参数传入 ~:wrap-render~ 函数, 返回的结果传入下一个的 ~:wrap-render~ 函数.
+
+* 编写自己的mixin
+一个简单的, 强制每一秒都刷新的mixin:
+#+BEGIN_SRC clojure
+  (def autorefresh-mixin
+    {:did-mount (fn [state]
+                  (let [comp (:rum/react-component state)
+                        callback #(rum/request-render comp)
+                        interval (js/setInterval callback 1000)]
+                    (assoc state ::interval interval)))
+     :transfer-state (fn [old-state state]
+                       (merge state (select-keys old-state [::interval])))
+     :will-unmount (fn [state]
+                     (js/clearInterval (::interval state)))})
+
+  (rum/defc timer < autorefresh-mixin []
+    [:div.timer (.toISOString (js/Date .))])
+#+END_SRC
+
+* 把所有的东西组合到一起.
+假设你有一个简单的render函数:
+#+BEGIN_SRC clojure
+  (defn render-label [text]
+    (sablono.core/html
+     [:div.label text]))
+#+END_SRC
+
+你创建一个mixin, 把它转换成一个React组件:
+#+BEGIN_SRC clojure
+  (def label-mixin
+    {:render (fn [state]
+               [(render-label (:text state)) state])})
+#+END_SRC
+
+然后你通过一个单独的mixin来创建React类:
+#+BEGIN_SRC clojure
+  (def label-class (rum/build-class [label-mixin] "label-class"))
+#+END_SRC
+
+然后定义一个简单的wrapper来把这个类转化成React元素:
+#+BEGIN_SRC clojure
+  (defn label-ctor [text]
+    (rum/element label-class {:text text} nil))
+#+END_SRC
+
+最后你调用ctor来获得一个元素的实例, 并把它挂载在页面的某个位置:
+#+BEGIN_SRC clojure
+  (rum/mount (label-ctor "Hello") js/document.body)
+#+END_SRC
+
+这个是rum中发生的每一步的细节, 通过使用 ~rum/defc~, 所有的事情都被压缩成了一步.
+#+BEGIN_SRC clojure
+  (rum/defc label [text]
+    [:div.label text])
+
+  (rum/mount (label "Hello") js/document.body)
+#+END_SRC
