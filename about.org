@@ -5,9 +5,12 @@
   (def ^:const DOGLOOKSGOOD
     {:name "Tianshu Shi"
      :description "A stupid Coder who loves dog"
+     :tools [[NeoVim Tmux Fish]
+             [Emacs]
+             [IntelliJ_IDEA]]
      :major #{Python Clojure}
      :favor (lazy-cat ["Comics" "StarcraftII"]
                       (map :interested #'what-ever))
-     :dreaming `(str "something new, made by"
-                     ~(:name DOGLOOKSGOOD))})
+     :dream `(str "something new, made by"
+                  ~(:name DOGLOOKSGOOD))})
 #+END_SRC
