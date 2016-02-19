@@ -2,7 +2,7 @@
 #+DATE: 2016-02-19
 #+author:      DogLooksGood
 #+EMAIL:       DogLooksGood@localhost
-#+URI:         /blog/%y/%m/%d/rum
+#+URI:         /blog/%y/%m/%d/lein_template
 #+KEYWORDS:    clojure
 #+TAGS:        clojure leiningen
 #+LANGUAGE:    en

@@ -1,0 +1,39 @@
+#+TITLE: Emacs Clojure 开发的的一些配置
+#+DATE: 2016-02-19
+#+author:      DogLooksGood
+#+EMAIL:       DogLooksGood@localhost
+#+URI:         /blog/%y/%m/%d/cider
+#+KEYWORDS:    clojure
+#+TAGS:        clojure cider
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:t \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: Cider的一些实用配置
+
+* 避免在 ~project.clj~ 中加入cider的依赖.
+编辑 ~.lein/profiles.clj~, 在其中加入 ~:emacs~ 一项:
+#+BEGIN_SRC clojure
+  { ...                                   ;; 其他的配置
+   :emacs
+   {:dependencies [[org.clojure/tools.nrepl "0.2.12"]
+                    ;; piggieback提供nrepl一致的CLJS REPL
+                   [com.cemerick/piggieback "0.2.1"]]
+    :plugins [[cider/cider-nrepl "0.11.0-SNAPSHOT"]
+              ;; clj-refactor依赖refactor-nrepl
+              [refactor-nrepl "2.0.0-SNAPSHOT"]]
+    :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}}
+#+END_SRC
+然后修改Emacs的配置文件:
+#+BEGIN_SRC emacs-lisp
+  (setq cider-lein-parameters "with-profile +emacs repl :headless")
+#+END_SRC
+启动REPL的时候, 在Emacs中打开.clj文件, 然后用 ~cider-jack-in~.
+/这样既可以省去在每一个项目中配置Cider的依赖, 又可以不影响在Emacs以外启动的REPL,
+毕竟cider-nrepl对启动速度的影响太大了:(/
+
+* foo-bar或:baz算一个符号
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'clojure-mode-hook (lambda ()
+                                 (dolist (c (string-to-list ":_-?!#*"))
+                                   (modify-syntax-entry c "w" clojure-mode-syntax-table))))
+#+END_SRC
+/按照默认的规则, 每次 ~M-Backspace~ 或者 ~M-m~ 的时候, 都非常纠结./
