@@ -4,16 +4,23 @@
     <title>狗好看の世界</title>
     <link>https://DogLooksGood.github.io</link>
     <description>Less words, more attempting.</description>
-    <pubDate>Fri, 19 Feb 2016 18:08:32 CST</pubDate>
-    <lastBuildDate>Fri, 19 Feb 2016 18:08:32 CST</lastBuildDate>
+    <pubDate>Fri, 19 Feb 2016 23:57:34 CST</pubDate>
+    <lastBuildDate>Fri, 19 Feb 2016 23:57:34 CST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
     <item>
+      <title>Emacs Clojure 开发的的一些配置</title>
+      <link>https://DogLooksGood.github.io/blog/2016/02/19/cider</link>
+      <description><![CDATA[Cider的一些实用配置]]></description>
+      <pubDate>2016-02-19</pubDate>
+      <guid>https://DogLooksGood.github.io/blog/2016/02/19/cider</guid>
+    </item>
+    <item>
       <title>Leiningen 模板的创建</title>
-      <link>https://DogLooksGood.github.io/blog/2016/02/19/rum</link>
+      <link>https://DogLooksGood.github.io/blog/2016/02/19/lein_template</link>
       <description><![CDATA[Leiningen 模板创建]]></description>
       <pubDate>2016-02-19</pubDate>
-      <guid>https://DogLooksGood.github.io/blog/2016/02/19/rum</guid>
+      <guid>https://DogLooksGood.github.io/blog/2016/02/19/lein_template</guid>
     </item>
     <item>
       <title>Rum - 一个简单,灵活,可扩展的ClojureScript的React实现</title>

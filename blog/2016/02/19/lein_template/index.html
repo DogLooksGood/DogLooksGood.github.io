@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>Leiningen 模板的创建 - 狗好看の世界</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="DogLooksGood" />
+    <meta name="description" content="Leiningen 模板创建" />
+    <meta name="keywords" content="clojure" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <link href="//cdn.bootcss.com/highlight.js/9.1.0/styles/github.min.css" rel="stylesheet">
+  </head>
+
+  <body class="container">
+    <div>
+      <header class="masthead">
+	
+        <img class="avatar" src="/media/img/avatar.png" />
+
+	<div>
+<h1 class="masthead-title"><a href="/">狗好看の世界</a></h1>
+        <p>Less words, more attempting.</p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="https://github.com/DogLooksGood">GitHub</a></li>
+          <!-- <li><a href="/rss.xml">RSS</a></li> -->
+        </ul>
+	</div>
+	
+
+        <!-- <form method="get" id="searchform" action="//www.google.com/search"> -->
+        <!--   <input type="text" class="field" name="q" id="s" placeholder="Search"> -->
+        <!--   <input type="hidden" name="as_sitesearch" value="DogLooksGood.github.io"> -->
+        <!-- </form> -->
+
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>Leiningen 模板的创建</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline1">创建模板</a></li>
+<li><a href="#orgheadline2">模板的结构</a></li>
+<li><a href="#orgheadline3">设置模板中的一些定义</a></li>
+<li><a href="#orgheadline4">为模板中添加占位符</a></li>
+<li><a href="#orgheadline5">测试模板</a></li>
+<li><a href="#orgheadline6">安装你的模板</a></li>
+<li><a href="#orgheadline7">使用本地仓库中的模板</a></li>
+<li><a href="#orgheadline8">发布模板</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1">创建模板</h2>
+<div class="outline-text-2" id="text-orgheadline1">
+<p>
+使用和创建Clojure项目类似的方式来创建模板, 不同的地方就是为了创建模板, 你需要使用一个叫做 <code>template</code> 的模板.
+</p>
+<pre class="example">
+lein new template your-template-name
+</pre>
+<p>
+如果创建了一个island的模板, 使用下面的命令
+</p>
+<pre class="example">
+lein new template island
+</pre>
+<p>
+创建成功, 会得到下面的信息.
+<img src="/assets/blog/2016/02/19/lein_template/create_template_succeed.png" alt="create_template_succeed.png" />
+<i>lein-newnew的文档中, 使用了 <code>--to-dir</code> 的参数, 来指定项目目录的名字.</i>
+<i>这并不是必须的, 只在需要指定文件夹名称的时候使用即可.</i>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2">模板的结构</h2>
+<div class="outline-text-2" id="text-orgheadline2">
+
+<div class="figure">
+<p><img src="/assets/blog/2016/02/19/lein_template/dir_tree.png" alt="dir_tree.png" />
+</p>
+</div>
+
+<p>
+<code>project.clj</code> - 这个文件和普通的项目中的一样, 除了项目的名字后面多了一个 <code>/lein-template</code>.
+这个后缀使得leiningen能在 <a href="http://clojars.org/">Clojars</a> 上面找到他.
+</p>
+
+<p>
+<code>source/leiningen/new/island.clj</code> - 定义了项目如何通过这个模板创建. 
+比如说定义哪些文件是通过模板创建的, 和如何创建.
+</p>
+
+<p>
+<code>resources/leiningen/new/island/</code> - 这个是你放源码和项目文件的地方, 
+动态的在源码中嵌入项目名称可以通过特定的标签来实现.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-2">
+<h2 id="orgheadline3">设置模板中的一些定义</h2>
+<div class="outline-text-2" id="text-orgheadline3">
+<p>
+我的模板需要一个自定义的 <code>project.clj</code> 文件, 所以我编辑 <code>src/leiningen/new/island.clj</code> 来生成一些文件.
+我的模板一共要生成三个文件:
+</p>
+<ul class="org-ul">
+<li><code>project.clj</code></li>
+<li><code>src/server/island/core.clj</code></li>
+<li><code>src/client/island/core.cljs</code></li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(ns leiningen.new.island
+  (:require [leiningen.new.templates :refer [renderer name-to-path -&gt;files]]
+            [leiningen.core.main :as main]))
+
+(def render (renderer "island"))
+
+(defn island
+  "Generate a simple project"
+  [name]
+  (let [data {:name name
+              :sanitized (name-to-path name)}]
+    (main/info "Generating fresh 'lein new' island project.")
+    (-&gt;files data
+             ["project.clj" (render "project.clj" data)]
+             ["src/server/{{sanitized}}/core.clj" (render "core.clj" data)]
+             ["src/client/{{sanitized}}/core.cljs" (render "core.cljs" data)])))
+</pre>
+</div>
+<p>
+先把当前项目中的 <code>project.clj</code> 复制到 <code>resources/leiningen/new/island/</code> 下面. 
+然后编写这三个文件.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-2">
+<h2 id="orgheadline4">为模板中添加占位符</h2>
+<div class="outline-text-2" id="text-orgheadline4">
+<p>
+你需要在模板文件中指定一些占位符, 用来在使用 <code>lein new island my-new-project</code> 生成项目的时候, 
+注入正确的内容. 模板文件 <code>resources/leiningen/new/island/project.clj</code> 加入一些代表项目名称的占位符.
+编辑这个文件:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defproject {{name}} "0.1.0-SNAPSHOT"
+  :description "FIXME: write description"
+  :url "http://example.com/FIXME"
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :dependencies [[org.clojure/clojure "1.7.0"]
+                 [org.clojure/clojurescript "1.7.170"]
+                 [org.clojure/core.async "0.2.374"
+                  :exclusions [org.clojure/tools.reader]]
+                 [datascript "0.15.0"]
+                 [cljsjs/react "0.14.3-0"]
+                 [cljsjs/react-dom "0.14.3-1"]
+                 [sablono "0.6.2"]
+                 [org.omcljs/om "1.0.0-alpha30"]
+                 [org.danielsz/system "0.3.0-SNAPSHOT"]
+                 [hiccup "1.0.5"]
+                 [http-kit "2.1.19"]
+                 [com.taoensso/sente "1.7.0"]
+                 [com.datomic/datomic-free "0.9.5206"
+                  :exclusions [joda-time]]
+                 [compojure "1.4.0"]]
+
+  :plugins [[lein-cljsbuild "1.1.2"
+             :exclusions [org.clojure/clojure]]]
+
+  :source-paths ["src/server"]
+
+  :clean-targets ^{:protect false} ["resources/public/js" "target"]
+
+  :figwheel
+  {:http-server-port 3449
+   :http-server-root "public"
+   :ring-handler {{name}}.core/app}
+
+  :cljsbuild
+  {:builds
+   [{:id "dev"
+     :source-paths ["src/client"]
+     :figwheel true
+     :compiler {:main {{name}}.core
+                :asset-path "js/out"
+                :output-to "resources/public/js/app.js"
+                :output-dir "resources/public/js/out"}}]})
+</pre>
+</div>
+<p>
+<code>{{name}}</code> 会被替换成项目的名字.
+</p>
+
+<p>
+这个是 <code>resources/leiningen/new/island/core.clj</code>:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(ns {{name}}.core)
+
+(defn foo []
+  (println "Hello, World"))
+</pre>
+</div>
+
+<p>
+这个是 <code>resources/leiningen/new/island/core.cljs</code>
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(ns {{name}}.core
+    (:require))
+
+(enable-console-print!)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5">测试模板</h2>
+<div class="outline-text-2" id="text-orgheadline5">
+<p>
+如果要测试模板的效果, 首先用下面的命令, 讲模板打包成一个 <code>.jar</code>.
+</p>
+<pre class="example">
+lein jar
+</pre>
+<p>
+现在可以进入 <code>target</code> 目录下面, 使用leiningen创建新项目.
+</p>
+<pre class="example">
+cd target
+lein new my-new-project
+</pre>
+<p>
+当你进入 <code>target</code> 目录后, jar文件会处于你的Java的CLASSPATH中. 所以对于leiningen可以使用它.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6">安装你的模板</h2>
+<div class="outline-text-2" id="text-orgheadline6">
+<p>
+如果觉得爽了, 就可以安装到maven的本地仓库了. 在项目的根目录下面. 
+之后就可以在任何地方使用这个模板了, 需要注意的是, leiningen当前的版本下, 不允许使用 <code>SNAPSHOT</code> 版本的模板.
+所以需要先将模板项目(例子中的island)的 <code>project.clj</code> 中的版本号的后缀 <code>-SNAPSHOT</code> 去掉. 
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defproject island/lein-template "0.1.0" ;; 去掉 -SNAPSHOT
+  ... )
+</pre>
+</div>
+<p>
+之后执行:
+</p>
+<pre class="example">
+lein install
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-2">
+<h2 id="orgheadline7">使用本地仓库中的模板</h2>
+<div class="outline-text-2" id="text-orgheadline7">
+<pre class="example">
+lein new island my-new-project
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-2">
+<h2 id="orgheadline8">发布模板</h2>
+<div class="outline-text-2" id="text-orgheadline8">
+<p>
+未完待续...
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-02-19</span>
+        <span title="last modification date" class="post-info">2016-02-19</span>
+        <span title="tags" class="post-info"><a href="/tags/clojure-leiningen/">clojure leiningen</a></span>
+        <span title="author" class="post-info">DogLooksGood</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'DogLooksGood'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="//code.jquery.com/jquery-latest.min.js"></script>
+      <script src="//cdn.bootcss.com/highlight.js/9.1.0/highlight.min.js"></script>
+      <script src="//cdn.bootcss.com/highlight.js/9.1.0/languages/clojure.min.js"></script>
+      <script src="//cdn.bootcss.com/highlight.js/9.1.0/languages/clojure-repl.min.js"></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.x (<a href="http://orgmode.org">Org mode</a> 8.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:DogLooksGood@localhost">DogLooksGood</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>
