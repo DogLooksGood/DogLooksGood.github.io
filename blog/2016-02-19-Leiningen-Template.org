@@ -1,0 +1,164 @@
+#+TITLE: Leiningen 模板的创建
+#+DATE: 2016-02-19
+#+author:      DogLooksGood
+#+EMAIL:       DogLooksGood@localhost
+#+URI:         /blog/%y/%m/%d/rum
+#+KEYWORDS:    clojure
+#+TAGS:        clojure leiningen
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:t \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: Leiningen 模板创建
+
+* 创建模板
+使用和创建Clojure项目类似的方式来创建模板, 不同的地方就是为了创建模板, 你需要使用一个叫做 ~template~ 的模板.
+#+BEGIN_EXAMPLE
+  lein new template your-template-name
+#+END_EXAMPLE
+如果创建了一个island的模板, 使用下面的命令
+#+BEGIN_EXAMPLE
+  lein new template island
+#+END_EXAMPLE
+创建成功, 会得到下面的信息.
+[[file:2016-02-19-Leiningen-Template/create_template_succeed.png]]
+/lein-newnew的文档中, 使用了 ~--to-dir~ 的参数, 来指定项目目录的名字./
+/这并不是必须的, 只在需要指定文件夹名称的时候使用即可./
+
+* 模板的结构
+[[file:2016-02-19-Leiningen-Template/dir_tree.png]]
+
+~project.clj~ - 这个文件和普通的项目中的一样, 除了项目的名字后面多了一个 ~/lein-template~.
+这个后缀使得leiningen能在 [[http://clojars.org][Clojars]] 上面找到他.
+
+~source/leiningen/new/island.clj~ - 定义了项目如何通过这个模板创建. 
+比如说定义哪些文件是通过模板创建的, 和如何创建.
+
+~resources/leiningen/new/island/~ - 这个是你放源码和项目文件的地方, 
+动态的在源码中嵌入项目名称可以通过特定的标签来实现.
+
+* 设置模板中的一些定义
+我的模板需要一个自定义的 ~project.clj~ 文件, 所以我编辑 ~src/leiningen/new/island.clj~ 来生成一些文件.
+我的模板一共要生成三个文件:
+- ~project.clj~ 
+- ~src/server/island/core.clj~
+- ~src/client/island/core.cljs~
+
+#+BEGIN_SRC clojure
+  (ns leiningen.new.island
+    (:require [leiningen.new.templates :refer [renderer name-to-path ->files]]
+              [leiningen.core.main :as main]))
+
+  (def render (renderer "island"))
+
+  (defn island
+    "Generate a simple project"
+    [name]
+    (let [data {:name name
+                :sanitized (name-to-path name)}]
+      (main/info "Generating fresh 'lein new' island project.")
+      (->files data
+               ["project.clj" (render "project.clj" data)]
+               ["src/server/{{sanitized}}/core.clj" (render "core.clj" data)]
+               ["src/client/{{sanitized}}/core.cljs" (render "core.cljs" data)])))
+#+END_SRC
+先把当前项目中的 ~project.clj~ 复制到 ~resources/leiningen/new/island/~ 下面. 
+然后编写这三个文件.
+
+* 为模板中添加占位符
+你需要在模板文件中指定一些占位符, 用来在使用 ~lein new island my-new-project~ 生成项目的时候, 
+注入正确的内容. 模板文件 ~resources/leiningen/new/island/project.clj~ 加入一些代表项目名称的占位符.
+编辑这个文件:
+#+BEGIN_SRC clojure
+  (defproject {{name}} "0.1.0-SNAPSHOT"
+    :description "FIXME: write description"
+    :url "http://example.com/FIXME"
+    :license {:name "Eclipse Public License"
+              :url "http://www.eclipse.org/legal/epl-v10.html"}
+    :dependencies [[org.clojure/clojure "1.7.0"]
+                   [org.clojure/clojurescript "1.7.170"]
+                   [org.clojure/core.async "0.2.374"
+                    :exclusions [org.clojure/tools.reader]]
+                   [datascript "0.15.0"]
+                   [cljsjs/react "0.14.3-0"]
+                   [cljsjs/react-dom "0.14.3-1"]
+                   [sablono "0.6.2"]
+                   [org.omcljs/om "1.0.0-alpha30"]
+                   [org.danielsz/system "0.3.0-SNAPSHOT"]
+                   [hiccup "1.0.5"]
+                   [http-kit "2.1.19"]
+                   [com.taoensso/sente "1.7.0"]
+                   [com.datomic/datomic-free "0.9.5206"
+                    :exclusions [joda-time]]
+                   [compojure "1.4.0"]]
+  
+    :plugins [[lein-cljsbuild "1.1.2"
+               :exclusions [org.clojure/clojure]]]
+
+    :source-paths ["src/server"]
+  
+    :clean-targets ^{:protect false} ["resources/public/js" "target"]
+
+    :figwheel
+    {:http-server-port 3449
+     :http-server-root "public"
+     :ring-handler {{name}}.core/app}
+
+    :cljsbuild
+    {:builds
+     [{:id "dev"
+       :source-paths ["src/client"]
+       :figwheel true
+       :compiler {:main {{name}}.core
+                  :asset-path "js/out"
+                  :output-to "resources/public/js/app.js"
+                  :output-dir "resources/public/js/out"}}]})
+#+END_SRC
+~{{name}}~ 会被替换成项目的名字.
+
+这个是 ~resources/leiningen/new/island/core.clj~:
+#+BEGIN_SRC clojure
+  (ns {{name}}.core)
+
+  (defn foo []
+    (println "Hello, World"))
+#+END_SRC
+
+这个是 ~resources/leiningen/new/island/core.cljs~
+#+BEGIN_SRC clojure
+  (ns {{name}}.core
+      (:require))
+
+  (enable-console-print!)
+#+END_SRC
+
+* 测试模板
+如果要测试模板的效果, 首先用下面的命令, 讲模板打包成一个 ~.jar~.
+#+BEGIN_EXAMPLE
+  lein jar
+#+END_EXAMPLE
+现在可以进入 ~target~ 目录下面, 使用leiningen创建新项目.
+#+BEGIN_EXAMPLE
+  cd target
+  lein new my-new-project
+#+END_EXAMPLE
+当你进入 ~target~ 目录后, jar文件会处于你的Java的CLASSPATH中. 所以对于leiningen可以使用它.
+
+* 安装你的模板
+如果觉得爽了, 就可以安装到maven的本地仓库了. 在项目的根目录下面. 
+之后就可以在任何地方使用这个模板了, 需要注意的是, leiningen当前的版本下, 不允许使用 ~SNAPSHOT~ 版本的模板.
+所以需要先将模板项目(例子中的island)的 ~project.clj~ 中的版本号的后缀 ~-SNAPSHOT~ 去掉. 
+#+BEGIN_SRC clojure
+  (defproject island/lein-template "0.1.0" ;; 去掉 -SNAPSHOT
+    ... )
+#+END_SRC
+之后执行:
+#+BEGIN_EXAMPLE
+  lein install
+#+END_EXAMPLE
+
+* 使用本地仓库中的模板
+#+BEGIN_EXAMPLE
+  lein new island my-new-project
+#+END_EXAMPLE
+
+* 发布模板
+未完待续...
