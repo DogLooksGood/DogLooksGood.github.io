@@ -27,6 +27,7 @@
   (setq cider-lein-parameters "with-profile +emacs repl :headless")
 #+END_SRC
 启动REPL的时候, 在Emacs中打开.clj文件, 然后用 ~cider-jack-in~.
+
 /这样既可以省去在每一个项目中配置Cider的依赖, 又可以不影响在Emacs以外启动的REPL,
 毕竟cider-nrepl对启动速度的影响太大了:(/
 
