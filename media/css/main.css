@@ -50,6 +50,7 @@ h1, h2, h3 {
     margin: 30px 0 20px;
     font-size: 20px;
     font-weight: bold;
+    font-family: "Comic Sans MS";
     line-height: 1.1;
     color: #111;
     text-rendering: optimizeLegibility;
@@ -61,15 +62,15 @@ h1:before, h2:before, h3:before {
     display: none;
 }
 h1:before {
-    content: "*";
+    content: ">";
     left: -1.25em;
 }
 h2:before {
-    content: "**";
+    content: ">>";
     left: -2em;
 }
 h3:before {
-    content: "***";
+    content: ">>>";
     left: -2.5em;
 }
 i, em, b, strong {
