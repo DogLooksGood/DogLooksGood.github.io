@@ -93,9 +93,10 @@
 <div class="outline-text-2" id="text-orgheadline2">
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(add-hook 'clojure-mode-hook (lambda ()
-                               (dolist (c (string-to-list ":_-?!#*"))
-                                 (modify-syntax-entry c "w" clojure-mode-syntax-table))))
+<pre class="src src-emacs-lisp">(add-hook 'clojure-mode-hook
+          (lambda ()
+            (dolist (c (string-to-list ":_-?!#*"))
+              (modify-syntax-entry c "w" clojure-mode-syntax-table))))
 </pre>
 </div>
 <p>
