@@ -48,13 +48,17 @@ p {
 h1, h2, h3 {
     position: relative;
     margin: 30px 0 20px;
+    font-family: "Comic Sans MS";
     font-size: 20px;
     font-weight: bold;
-    font-family: "Comic Sans MS";
     line-height: 1.1;
-    color: #111;
     text-rendering: optimizeLegibility;
 }
+
+h1 {
+    font-size: 30px;
+}
+
 h1:before, h2:before, h3:before {
     position: absolute;
     top: auto;
@@ -84,9 +88,11 @@ b, strong {
 b:before, b:after, strong:before, strong:after {
     content: "*";
 }
+/*
 i:before, i:after, em:before, em:after {
     content: "/";
 }
+*/
 hr {
     margin: 0;
     border: 0;
@@ -96,7 +102,7 @@ hr:after {
     margin: 20px 0;
     overflow: hidden;
     white-space: nowrap;
-    content: "===================================================================================";
+    content: "-----------------------------------------------------------------------------------";
     color: #ccc;
 }
 ul, ol {
@@ -186,7 +192,7 @@ table th.right, table td.right {
     display: block;
     overflow: hidden;
     white-space: nowrap;
-    content: "===================================================================================";
+    content: "-----------------------------------------------------------------------------------";
     margin: 10px 0;
     color: #ccc;
 }
@@ -253,7 +259,7 @@ table th.right, table td.right {
     display: block;
     overflow: hidden;
     white-space: nowrap;
-    content: "===================================================================================";
+    content: "-----------------------------------------------------------------------------------";
     color: #ccc;
 }
 .post img {
@@ -298,7 +304,7 @@ table th.right, table td.right {
 .post-meta:after {
     overflow: hidden;
     white-space: nowrap;
-    content: "===================================================================================";
+    content: "-----------------------------------------------------------------------------------";
     display: block;
     margin-top: -1px;
     color: #ccc;
@@ -308,13 +314,18 @@ table th.right, table td.right {
 #table-of-contents {
     position: fixed;
     left: 0em;
-    top: 0em;
+    bottom: 0em;
+    padding-right: 0.5em;
     border:1px solid #e1e1e8;
+    border-radius: 5px;
+    /*
     -webkit-box-shadow: 0 0 1em #777777;
     -moz-box-shadow: 0 0 1em #777777;
     -webkit-border-bottom-left-radius: 5px;
     -moz-border-radius-bottomleft: 5px;
-    text-align: right;
+*/
+    text-align: left;
+    background-color: rgba(250, 250, 250, 0.8);
     /* ensure doesn't flow off the screen when expanded */
     max-height: 80%;
     overflow: auto;
@@ -344,6 +355,7 @@ table th.right, table td.right {
 #table-of-contents ul>:first-child {
     color: blue;
 }
+
 
 #table-of-contents #text-table-of-contents {
     display: none;
