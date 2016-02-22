@@ -4,7 +4,7 @@
 #+EMAIL:       DogLooksGood@localhost
 #+URI:         /blog/%y/%m/%d/lein_template
 #+KEYWORDS:    clojure
-#+TAGS:        clojure leiningen
+#+TAGS:        clojure,leiningen
 #+LANGUAGE:    en
 #+OPTIONS:     H:3 num:nil toc:t \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
 #+DESCRIPTION: Leiningen 模板创建

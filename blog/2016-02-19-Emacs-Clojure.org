@@ -4,7 +4,7 @@
 #+EMAIL:       DogLooksGood@localhost
 #+URI:         /blog/%y/%m/%d/cider
 #+KEYWORDS:    clojure
-#+TAGS:        clojure cider
+#+TAGS:        clojure,cider
 #+LANGUAGE:    en
 #+OPTIONS:     H:3 num:nil toc:t \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
 #+DESCRIPTION: Cider的一些实用配置
