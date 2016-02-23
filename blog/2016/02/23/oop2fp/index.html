@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <title>本狗的Docker尝试 - 狗好看の世界</title>
+    <title>从OOP的设计模式到FP - 狗好看の世界</title>
     <meta charset="utf-8" />
     <meta name="author" content="DogLooksGood" />
-    <meta name="description" content="Docker的常用命令和配置" />
-    <meta name="keywords" content="docker" />
+    <meta name="description" content="Clojure中一些设计模式的实现" />
+    <meta name="keywords" content="clojure" />
     <link rel="stylesheet" href="/media/css/main.css" type="text/css">
     <link href="//cdn.bootcss.com/highlight.js/9.1.0/styles/github.min.css" rel="stylesheet">
   </head>
@@ -39,26 +39,127 @@
 
 <div>
 <div class="post">
-<h1>本狗的Docker尝试</h1>
+<h1>从OOP的设计模式到FP</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">先占个位置</a></li>
-<li><a href="#orgheadline2">如何方便退出docker的shell但是不终止.</a></li>
+<li><a href="#orgheadline1">Strategy</a></li>
+<li><a href="#orgheadline2">Adapter</a></li>
+<li><a href="#orgheadline3">Template Method</a></li>
 </ul>
 </div>
 </div>
+<pre class="example">
+用一百个函数来操作一种数据结构, 优于用十个函数来操作十种数据结构.
+                     -- 艾伦·J·佩利
+</pre>
+<p>
+用更多的处理数据的方式来处理数据, 而不是定义更多的数据类型.
+这样可以让系统间更容易融合, 也可以让编写代码时更简单, 关注的东西更少.
+对于Clojure来讲, 由于相对于OOP减少了数据的类型(绝大部分的数据都可以看作是字典和列表的组合),
+使得写什么样的程序, 处理的都是比较熟悉的数据结构.
+对于设计模式中的很多东西, 在Clojure中并不是必要的, 这里是策略模式, 适配器模式和模板方法模式在Clojure中的实现.
+</p>
 
 <div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">先占个位置</h2>
+<h2 id="orgheadline1">Strategy</h2>
+<div class="outline-text-2" id="text-orgheadline1">
+<p>
+策略模式. OOP中, 执行一个操作或者进行一个运算的时候, 如果有多种方案, 我们可以选择策略模式.
+首先执行者提供一个策略接口, 然后针对不同的策略, 提供不同的策略实现类.
+下面是Clojure中的实现:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">;; 先做原型再写程序
+(defn protocol-to-program [demand] ...)
+;; 先做样例再完善
+(defn demo-to-program [demand] ...)
+;; 直接写程序
+(defn write-program-directly [demand] ...)
+
+;; 选择一种写程序的策略
+(defn choose-program-technique [team]
+  (cond
+    (= 1 team) write-program-directly
+    (big-team? team) protocol-to-program
+    :else demo-to-program))
+
+(defn program [demand team]
+  ((choose-program-technique team) demand))
+</pre>
+</div>
+<p>
+首先假设我们有三种写程序的方法, 然后当我们要写程序(program方法)的时候, 
+我们根据team的大小来决定用什么方式来实现需求(demand). 这里调用了choose-program-technique,
+如果team只有1人, 选择草率的直接写. 如果是一个大的team就从原型开始, 否则就是从demo开始.
+choose-program-technique会直接返回一个函数, 然后我们直接调用返回的函数就可以.
+由于我们实际需要的就是函数, 所以没有必要为了函数再封装成对象并提供接口.
+</p>
+</div>
 </div>
 
 <div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">如何方便退出docker的shell但是不终止.</h2>
+<h2 id="orgheadline2">Adapter</h2>
 <div class="outline-text-2" id="text-orgheadline2">
 <p>
-sudo docker attach —detach-keys="ctrl-\\" machine-name
+适配器模式, 在面向对象中, 表示了同样数据的对象, 往往不能应用在所有的场合.
+特别是在使用三方库的时候, 因为不同的库中对于同样数据可能都有自己的一套封装.
+所以为了让三方库可以替换, 我们需要提供对象与工具类之间的适配.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defprotocol BarkingDog
+  "这是一只正在叫的狗"
+  (bark [this] "dog should bark"))
+
+(extend-protocol BarkingDog
+  clojure.lang.IPersistentVector
+  (bark [v] (conj v "bark!")))
+
+(def a-vector [1 2 3 4])
+
+(bark a-vector)
+;; =&gt; [1 2 3 4 "bark!"]
+</pre>
+</div>
+<p>
+在Clojure中, 通过protocol来代替接口, 通过extend-protocol来适配接口和数据.
+这使得在Clojure中, 如果有数据和函数不能适配的情况, 可以直接使用这种方法, 来告诉函数对应该数据应该怎么做.
+免去写适配器接口和适配器类的麻烦.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-2">
+<h2 id="orgheadline3">Template Method</h2>
+<div class="outline-text-2" id="text-orgheadline3">
+<p>
+模板方法模式, 用于在面向对象中, 有些类中的方法的处理逻辑实际上并不由本类所提供.
+一个逻辑可能有多个步骤组成, 而这个逻辑类并不关心每一步的具体实现是如何. 只是负责把所有的环节串联起来.
+在OOP中会为每一个环节提供一个接口, 然后通过对象的注入来为每一个环节提供特定的逻辑.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defn update-account-status
+  [account-id get-fn status save-fn]
+  (let [account (get-fn account-id)]
+    (when (not= status
+            (:status account))
+      (save-fn (assoc account :status status)))))
+
+(defn get-account-from-db ...)
+(defn get-account-from-datomic ...)
+(defn get-account-from-http-service ...)
+
+(defn save-account-to-db ...)
+(defn save-account-to-datomic ...)
+(defn save-account-to-http-service ...)
+</pre>
+</div>
+<p>
+在Clojure中, 通过高阶函数来实现. 直接传入需要的函数, 来填补某个部分所需要的逻辑.
 </p>
 </div>
 </div>
@@ -69,7 +170,7 @@ sudo docker attach —detach-keys="ctrl-\\" machine-name
       <div class="post-meta">
         <span title="post date" class="post-info">2016-02-23</span>
         <span title="last modification date" class="post-info">2016-02-23</span>
-        <span title="tags" class="post-info"><a href="/tags/docker/">docker</a></span>
+        <span title="tags" class="post-info"><a href="/tags/clojure/">clojure</a></span>
         <span title="author" class="post-info">DogLooksGood</span>
       </div>
       <section>
