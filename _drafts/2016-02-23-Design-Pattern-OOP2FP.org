@@ -1,0 +1,15 @@
+#+TITLE: 从OOP的设计模式到FP
+#+DATE: 2016-02-23
+#+EMAIL:       DogLooksGood@localhost
+#+URI:         /blog/%y/%m/%d/oop2fp
+#+KEYWORDS:    clojure
+#+TAGS:        clojure
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:t \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: Clojure中一些设计模式的实现
+
+#+BEGIN_EXAMPLE
+用一百个函数来操作一种数据结构,比用十个函数来操作十种数据结构要好
+                     -- 艾伦·J·佩利
+#+END_EXAMPLE
+
