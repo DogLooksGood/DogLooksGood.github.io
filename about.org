@@ -15,3 +15,5 @@
      :dream `(str "something new, made by"
                   ~(:name DOGLOOKSGOOD))})
 #+END_SRC
+
+狗好看的简历见[[https://gist.github.com/DogLooksGood/28553dcc3739fba68b92][这里]]
