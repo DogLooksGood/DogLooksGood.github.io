@@ -4,8 +4,8 @@
     <title>狗好看の世界</title>
     <link>https://DogLooksGood.github.io</link>
     <description>Less words, more attempting.</description>
-    <pubDate>二, 23  2 2016 15:09:54 CST</pubDate>
-    <lastBuildDate>二, 23  2 2016 15:09:54 CST</lastBuildDate>
+    <pubDate>二, 23  2 2016 15:32:57 CST</pubDate>
+    <lastBuildDate>二, 23  2 2016 15:32:57 CST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
     <item>
@@ -16,9 +16,9 @@
       <guid>https://DogLooksGood.github.io/blog/2016/02/23/oop2fp</guid>
     </item>
     <item>
-      <title>从OOP的设计模式到FP</title>
+      <title>本狗的Docker尝试</title>
       <link>https://DogLooksGood.github.io/blog/2016/02/23/oop2fp</link>
-      <description><![CDATA[Clojure中一些设计模式的实现]]></description>
+      <description><![CDATA[Docker的常用命令和配置]]></description>
       <pubDate>2016-02-23</pubDate>
       <guid>https://DogLooksGood.github.io/blog/2016/02/23/oop2fp</guid>
     </item>
