@@ -4,10 +4,99 @@
     <title>狗好看の世界</title>
     <link>https://DogLooksGood.github.io</link>
     <description>Less words, more attempting.</description>
-    <pubDate>二, 23  2 2016 23:00:47 CST</pubDate>
-    <lastBuildDate>二, 23  2 2016 23:00:47 CST</lastBuildDate>
+    <pubDate>Wed, 02 Mar 2016 22:28:17 CST</pubDate>
+    <lastBuildDate>Wed, 02 Mar 2016 22:28:17 CST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
+    <item>
+      <title>Emacs Clojure 开发的的一些配置</title>
+      <link>https://DogLooksGood.github.io/blog/2016/02/19/cider</link>
+      <description><![CDATA[Cider的一些实用配置]]></description>
+      <pubDate>2016-03-02</pubDate>
+      <guid>https://DogLooksGood.github.io/blog/2016/02/19/cider</guid>
+    </item>
+    <item>
+      <title>datascript_datomic_sync</title>
+      <link>https://DogLooksGood.github.io/blog/2016/03/02/datascript_datomic_sync/</link>
+      <description><![CDATA[<div>
+<div class="post">
+<h1>datascript_datomic_sync</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline1">数据结构</a></li>
+<li><a href="#orgheadline2">数据的查询</a></li>
+<li><a href="#orgheadline3">数据的更新</a></li>
+<li><a href="#orgheadline4">流程</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1">数据结构</h2>
+<div class="outline-text-2" id="text-orgheadline1">
+<p>
+消息有:message/to和:message/content, 用户有:user/nickname.
+:message/to是ref类型, 指向用户的entity-id
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2">数据的查询</h2>
+<div class="outline-text-2" id="text-orgheadline2">
+<div class="org-src-container">
+
+<pre class="src src-clojure">(d/q '[:find [(pull ?e [*]) ...]
+       :in $ ?n
+       :where
+       [?e :message/to ?u]
+       [?u :user/nickname ?n]]
+  (d/db conn) "dog")
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline3" class="outline-2">
+<h2 id="orgheadline3">数据的更新</h2>
+<div class="outline-text-2" id="text-orgheadline3">
+<div class="org-src-container">
+
+<pre class="src src-clojure">(def tx-data
+  [[1321867981 :message/to 1236782618 1283768726 true]
+   [1321867981 :message/content "dog" 1283768726 true]])
+
+(d/q '[:find [(pull ?e [*]) ...]
+       :in $ $tx-data ?n
+       :where
+       [$tx-data ?e]
+       [$ ?e :message/to ?u]
+       [$ ?u :user/nickname ?n]]
+  db-after tx-data "dog")
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline4" class="outline-2">
+<h2 id="orgheadline4">流程</h2>
+<div class="outline-text-2" id="text-orgheadline4">
+<ul class="org-ul">
+<li>客户端UI组件加载时, 向服务器和DataScript(还没有数据)发起查询. 查询语句需要是pull风格的.</li>
+<li>服务器通过pull的查询, 查出来需要的entity, 直接返回给客户端. 
+客户端不需要将entity拆分成tx, 直接合并到DataScript即可.</li>
+<li>监听tx-report-queue, 或者新发生transaction的tx-data和db-after, 
+在原有查询的基础上组合新的查询. 可以查询到所有受到影响的entity.</li>
+<li>把受到影响的entity推送给客户端.</li>
+<li>服务器推送的数据, 客户端UI组件重绘.</li>
+</ul>
+</div>
+</div>
+
+</div>
+</div>]]></description>
+      <pubDate>2016-03-02</pubDate>
+      <guid>https://DogLooksGood.github.io/blog/2016/03/02/datascript_datomic_sync/</guid>
+    </item>
     <item>
       <title>从OOP的设计模式到FP</title>
       <link>https://DogLooksGood.github.io/blog/2016/02/23/oop2fp</link>
@@ -28,13 +117,6 @@
       <description><![CDATA[Rum的学习笔记]]></description>
       <pubDate>2016-02-22</pubDate>
       <guid>https://DogLooksGood.github.io/blog/2016/02/13/rum</guid>
-    </item>
-    <item>
-      <title>Emacs Clojure 开发的的一些配置</title>
-      <link>https://DogLooksGood.github.io/blog/2016/02/19/cider</link>
-      <description><![CDATA[Cider的一些实用配置]]></description>
-      <pubDate>2016-02-22</pubDate>
-      <guid>https://DogLooksGood.github.io/blog/2016/02/19/cider</guid>
     </item>
     <item>
       <title>Leiningen 模板的创建</title>
