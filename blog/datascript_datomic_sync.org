@@ -1,4 +1,4 @@
-#+TITLE: datascript_datomic_sync
+#+TITLE: DataScript<-->Datomic数据同步
 #+DATE: 2016-03-02
 #+TAGS: clojure,datascript,datomic
 
