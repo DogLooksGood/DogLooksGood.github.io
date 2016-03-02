@@ -1,0 +1,38 @@
+#+TITLE: datascript_datomic_sync
+#+DATE: 2016-03-02
+#+TAGS: clojure,datascript,datomic
+
+* 数据结构
+消息有:message/to和:message/content, 用户有:user/nickname.
+:message/to是ref类型, 指向用户的entity-id
+* 数据的查询
+#+BEGIN_SRC clojure
+  (d/q '[:find [(pull ?e [*]) ...]
+         :in $ ?n
+         :where
+         [?e :message/to ?u]
+         [?u :user/nickname ?n]]
+    (d/db conn) "dog")
+#+END_SRC
+* 数据的更新
+#+BEGIN_SRC clojure
+  (def tx-data
+    [[1321867981 :message/to 1236782618 1283768726 true]
+     [1321867981 :message/content "dog" 1283768726 true]])
+
+  (d/q '[:find [(pull ?e [*]) ...]
+         :in $ $tx-data ?n
+         :where
+         [$tx-data ?e]
+         [$ ?e :message/to ?u]
+         [$ ?u :user/nickname ?n]]
+    db-after tx-data "dog")
+#+END_SRC
+* 流程
+- 客户端UI组件加载时, 向服务器和DataScript(还没有数据)发起查询. 查询语句需要是pull风格的.
+- 服务器通过pull的查询, 查出来需要的entity, 直接返回给客户端. 
+  客户端不需要将entity拆分成tx, 直接合并到DataScript即可.
+- 监听tx-report-queue, 或者新发生transaction的tx-data和db-after, 
+  在原有查询的基础上组合新的查询. 可以查询到所有受到影响的entity.
+- 把受到影响的entity推送给客户端.
+- 服务器推送的数据, 客户端UI组件重绘.
