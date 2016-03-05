@@ -2,10 +2,62 @@
 #+DATE: 2016-03-02
 #+TAGS: clojure,datascript,datomic
 
-* 数据结构
+* 新的方法
+目前能想到的方法是拿到 ~tx-report~ 的时候, 查询两次, 一次查询 ~db-after~, 一次查询 ~db-before~.
+如果直接查询全量数据, 涉及到的范围会非常大. 但是datomic支持指定多个数据源.
+
+假设有一个查询是这样的逻辑:
+#+BEGIN_SRC clojure
+  (d/q '[:find
+         [(pull ?e [:db/id
+                    :message/content
+                    {:message/from [:user/nickname]
+                     :message/to [:user/nickname]}]) ...]
+             :where
+             [?e :message/content]
+             [?e :message/to ?u]
+             [?e :message/from ?from]
+             [?u :user/nickname "dog"]
+             [?u :user/friends ?from]]
+        (d/db conn))
+#+END_SRC
+这个查询, 查询一个名叫dog的用户, 收到的所有来自于他的好友, 并发送给他的信息.
+这种查询的结果, 在两种情况下会发生变化.
+- 产生了新的符合条件的信息
+- dog的好友列表, 发生了变化.
+
+监听 ~tx-report-queue~, 我们可以得到四个比较重要的东西. 
+- ~db-before~ 事务发生之前的数据库
+- ~db-after~ 事务发生之后的数据库
+- ~tx-data~ 事务的所有datom, 本身也是一个数据源
+- ~tempids~ 事务中新增数据的entity id
+
+** 一种查询方法(不能解决所有问题)
+#+BEGIN_SRC clojure
+  (d/q '[:find [(pull ?e [:db/id
+                            :message/content
+                            {:message/from [:user/nickname]
+                             :message/to [:user/nickname]}]) ...]
+           :in $ $tx-data
+           :where
+           [$tx-data ?u]
+           [$ ?e :message/to ?u]
+           [$ ?e :message/from ?from]
+           [$ ?u :user/nickname "dog"]
+           [$ ?u :user/friends ?from]]
+      db tx-data)
+#+END_SRC
+假设用户列表发生变化, 我们用这个查询查询两次, 一次db为 ~db-before~, 一次db为 ~db-after~.
+
+然后对比得到的数据, 我们就得到了之前的查询结果的增量变化(新增或减少数据).
+
+如果不考虑数据的减少, 那么还是可以用下面的方法.
+
+* 这种方式只能增量同步
+** 数据结构
 消息有:message/to和:message/content, 用户有:user/nickname.
 :message/to是ref类型, 指向用户的entity-id
-* 数据的查询
+** 数据的查询
 #+BEGIN_SRC clojure
   (d/q '[:find [(pull ?e [*]) ...]
          :in $ ?n
@@ -14,7 +66,7 @@
          [?u :user/nickname ?n]]
     (d/db conn) "dog")
 #+END_SRC
-* 数据的更新
+** 数据的更新
 #+BEGIN_SRC clojure
   (def tx-data
     [[1321867981 :message/to 1236782618 1283768726 true]
@@ -28,7 +80,7 @@
          [$ ?u :user/nickname ?n]]
     db-after tx-data "dog")
 #+END_SRC
-* 流程
+** 流程
 - 客户端UI组件加载时, 向服务器和DataScript(还没有数据)发起查询. 查询语句需要是pull风格的.
 - 服务器通过pull的查询, 查出来需要的entity, 直接返回给客户端. 
   客户端不需要将entity拆分成tx, 直接合并到DataScript即可.
