@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>pub-sub - 狗好看の世界</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="DogLooksGood" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <link href="//cdn.bootcss.com/highlight.js/9.1.0/styles/github.min.css" rel="stylesheet">
+  </head>
+
+  <body class="container">
+    <div>
+      <header class="masthead">
+	
+        <img class="avatar" src="/media/img/avatar.png" />
+
+	<div>
+<h1 class="masthead-title"><a href="/">狗好看の世界</a></h1>
+        <p>Less words, more attempting.</p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="https://github.com/DogLooksGood">GitHub</a></li>
+          <!-- <li><a href="/rss.xml">RSS</a></li> -->
+        </ul>
+	</div>
+	
+
+        <!-- <form method="get" id="searchform" action="//www.google.com/search"> -->
+        <!--   <input type="text" class="field" name="q" id="s" placeholder="Search"> -->
+        <!--   <input type="hidden" name="as_sitesearch" value="DogLooksGood.github.io"> -->
+        <!-- </form> -->
+
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>pub-sub</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline1">Pubbing 和 Subbing</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1">Pubbing 和 Subbing</h2>
+<div class="outline-text-2" id="text-orgheadline1">
+<p>
+<span class="underline">并没有怎么看懂, 先记录下来</span>
+</p>
+
+<p>
+首先启动REPL, 并加载async.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(use 'clojure.core.async)
+</pre>
+</div>
+
+<p>
+<code>Publishing</code> (发行) 和 <code>Subscribing</code> (订阅) 是在处理异步事件时经常用的两个概念.
+<code>pub</code> 函数接收一个 channel 和一个 topic 函数, 返回一个 <code>publication</code>:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(def input-chan (chan))
+(def our-pub (pub input-chan :msg-type))
+</pre>
+</div>
+
+<p>
+<code>publication</code> 并不是 channel, 不要用put!向他发送消息.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(put! our-pub {:msg-type :greeting :text "hello"})
+;; IllegalArgumentException No implementation of method: :put! of protocol
+</pre>
+</div>
+
+<p>
+我们应该直接发送消息给原来的channel:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(&gt;!! input-chan {:msg-type :greeting :text "hello"})
+; true
+</pre>
+</div>
+<p>
+(通常情况下, 如果没有 <code>input-chan</code> 的消费者, 这里会阻塞. 但是 <code>pub</code> 的实现中, 会为它创建两个 <code>go</code> 块来
+代替主线程挂起. )
+</p>
+
+<p>
+<code>topic-fn</code> 会作用在所有的传给 publication 的值上, 在上面的情况中, <code>:msg-type</code> 被用来作为这个函数.
+并且会返回 <code>:greeting</code>, <code>topic-fn</code> 用来给消息分类, 但不会修改消息. 如果一个 publication使用 <code>inc</code> 作为topic函数
+传递的值也是不会改变的.
+我们如何获得这个值, 我们可以用对应 <code>sub</code> 函数:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(def output-chan (chan))
+(sub our-pub :greeting output-chan)
+; #object[clojure.core.async.impl.channels.ManyToManyChannel
+</pre>
+</div>
+<p>
+<code>sub</code> 接受一个 publication, 一个topic和一个channel. 这个channel会接受来自publication中的, 所有的满足
+<code>(= (topic-fn v) topic)</code> 的值.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(go-loop []
+  (let [{:keys [text]} (&lt;! output-chan)]
+    (println text)
+    (recur)))
+</pre>
+</div>
+
+<p>
+注意, 尽管我们之前已经把一个值放到了 <code>input-chan</code>, 但是这里什么都不会发生.
+因为 publication 会抛弃所有不符合 subscrbe 的 topic. 我们的原始的信息丢弃了.
+但是有了 subscribe channel 之后, 我们可以发布新的值.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(&gt;!! input-chan {:msg-type :greeting :text "hi"})
+;true
+;hi
+</pre>
+</div>
+
+<p>
+如果我们发布了一个频道不接受的值, 整个发布会阻塞.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(def loser-chan (chan))
+(sub our-pub :loser loser-chan)
+(&gt;!! input-chan {:msg-type :loser :text "I won't be accepted"})
+</pre>
+</div>
+
+<p>
+小心: 这里看起来返回 <code>true</code> 并且不会阻塞, 因为 pubilcation 实际上是从 <code>input-chan</code> 中取值.
+但是在发行中的 <code>go</code> 块是会阻塞的. <code>&gt;!!</code> 一个 <code>:loser</code> 在主线程不会阻塞, 但是在接下来的线程会阻塞.
+</p>
+
+<p>
+如果你向 publication 订阅一个channel, 确保他可以接受值. 你可以通过很多方式来实现, 但是最好从 publication 来处理.
+因为你可能不知道哪里出问题了, 直到另外一个 topic 也被阻塞了.
+</p>
+
+<p>
+有时候你无法这么做, 比如消费的操作是由资源决定的. 这种情况下, 你可以创建 topic 指定的 buffer: <code>pub</code> 函数最后传入一个
+<code>buf-fn</code> 作为参数. <code>buf-fn</code> 接受一个topic, 返回一个 buffer 和一个数值. buffer-fn 可以简单的是一个 map:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">  {:predict-election 100
+   :flip-a-coin 3}
+
+(def pub-central
+  (let [topic-fn #(case (:msg-type %) 
+                    :db-change :acid
+                    :http-request :stateless)
+        buf-fn #(case %
+                  :stateless (sliding-buffer 10)
+                  :acid (dropping-buffer 1000))]
+    (pub request-source topic-fn buf-fn)))
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-03-08</span>
+        <span title="last modification date" class="post-info">2016-03-08</span>
+        <span title="tags" class="post-info"><a href="/tags/clojure/">clojure</a></span>
+        <span title="author" class="post-info">DogLooksGood</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'DogLooksGood'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="//code.jquery.com/jquery-latest.min.js"></script>
+      <script src="//cdn.bootcss.com/highlight.js/9.1.0/highlight.min.js"></script>
+      <script src="//cdn.bootcss.com/highlight.js/9.1.0/languages/clojure.min.js"></script>
+      <script src="//cdn.bootcss.com/highlight.js/9.1.0/languages/clojure-repl.min.js"></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.x (<a href="http://orgmode.org">Org mode</a> 8.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:DogLooksGood@localhost">DogLooksGood</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>
