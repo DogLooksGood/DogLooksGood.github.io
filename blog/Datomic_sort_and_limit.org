@@ -31,8 +31,13 @@ stackoverflow中的这个方法, 个人觉得比较好.
       (mapv #(d/pull db '[:user/status :db/id :user/username] (:e %)))))
 #+END_SRC
 
-* TODO 根据entity-id排序怎么做
-这个需要了解一下Datomic中的四种索引.
+* DONE 根据entity-id排序怎么做
+- State "DONE"       from "TODO"       [2016-03-14 Mon 23:34]
+使用 ~d/datoms~ 和 ~AEVT~ 索引
+#+BEGIN_SRC clojure
+  (d/datoms (d/db conn)
+    :aevt :user/username)
+#+END_SRC
+这个会获取所有有 :user/username 属性的, 按照entity-id排序的datom.
 
-未完待续.
 
