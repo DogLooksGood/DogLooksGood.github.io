@@ -1,4 +1,4 @@
-#+TITLE: Datomic实现sort和limit
+#+TITLE: Datomic's sort and limit
 #+DATE: 2016-03-14
 #+TAGS: clojure, datomic
 
