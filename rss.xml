@@ -4,10 +4,94 @@
     <title>狗好看の世界</title>
     <link>https://DogLooksGood.github.io</link>
     <description>Less words, more attempting.</description>
-    <pubDate>Mon, 14 Mar 2016 23:11:24 CST</pubDate>
-    <lastBuildDate>Mon, 14 Mar 2016 23:11:24 CST</lastBuildDate>
+    <pubDate>Mon, 14 Mar 2016 23:17:14 CST</pubDate>
+    <lastBuildDate>Mon, 14 Mar 2016 23:17:14 CST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
+    <item>
+      <title>Datomic&#39;s sort and limit</title>
+      <link>https://DogLooksGood.github.io/blog/2016/03/14/datomic&#39;s-sort-and-limit/</link>
+      <description><![CDATA[<div>
+<div class="post">
+<h1>Datomic&#39;s sort and limit</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline1">Datomic的query中, 没有实现.</a></li>
+<li><a href="#orgheadline2">使用seek-datoms</a></li>
+<li><a href="#orgheadline3"><span class="todo TODO">TODO</span> 根据entity-id排序怎么做</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1">Datomic的query中, 没有实现.</h2>
+<div class="outline-text-2" id="text-orgheadline1">
+<p>
+<a href="https://groups.google.com/forum/#!topic/datomic/NgVviV9Sw8g">https://groups.google.com/forum/#!topic/datomic/NgVviV9Sw8g</a>
+这里说全部查出来然后直接内存中处理, 但这并不是一种好方法 - -#
+</p>
+
+<p>
+<a href="http://comments.gmane.org/gmane.comp.db.datomic.user/2256">http://comments.gmane.org/gmane.comp.db.datomic.user/2256</a>
+这里有一些关于 <code>datoms</code> 和 <code>index-range</code> 的讨论.
+</p>
+
+<p>
+<a href="http://clojurians-log.mantike.pro/datomic/2016-01-15.html">http://clojurians-log.mantike.pro/datomic/2016-01-15.html</a>
+这里有关于datomic没有 sort, offset, limit 的解释.
+</p>
+
+<p>
+<a href="http://stackoverflow.com/questions/27162566/equivalent-of-sql-limit-clause-in-datomic">http://stackoverflow.com/questions/27162566/equivalent-of-sql-limit-clause-in-datomic</a>
+stackoverflow中的这个方法, 个人觉得比较好.
+</p>
+</div>
+</div>
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2">使用seek-datoms</h2>
+<div class="outline-text-2" id="text-orgheadline2">
+<p>
+<code>seek-datoms</code> 会返回一个lazy-seq, 这样我们能做的事情就很多了.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">;; 使用 `AVET` 索引, 可以指定一到多个参数
+(d/seek-datoms
+  (d/db conn)
+  :avet :user/username)
+;; 得到的`似乎`是按照username排序的lazy-seq
+;; 如果需要前3个. 并且需要追加其他属性
+(let [db (d/db conn)]
+  (-&gt;&gt; (d/seek-datoms
+         (d/db conn)
+         :avet :user/username)
+         (take 3)
+    (mapv #(d/pull db '[:user/status :db/id :user/username] (:e %)))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-2">
+<h2 id="orgheadline3"><span class="todo TODO">TODO</span> 根据entity-id排序怎么做</h2>
+<div class="outline-text-2" id="text-orgheadline3">
+<p>
+这个需要了解一下Datomic中的四种索引.
+</p>
+
+<p>
+未完待续.
+</p>
+</div>
+</div>
+
+</div>
+</div>]]></description>
+      <pubDate>2016-03-14</pubDate>
+      <guid>https://DogLooksGood.github.io/blog/2016/03/14/datomic&#39;s-sort-and-limit/</guid>
+    </item>
     <item>
       <title>Emacs Clojure 开发的的一些配置</title>
       <link>https://DogLooksGood.github.io/blog/2016/02/19/cider</link>
