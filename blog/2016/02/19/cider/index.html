@@ -54,16 +54,22 @@
 <h2 id="orgheadline1">避免在 <code>project.clj</code> 中加入cider的依赖.</h2>
 <div class="outline-text-2" id="text-orgheadline1">
 <p>
+主要是处理 CLJS 开发的依赖, CIDER 自身的依赖在新版中已经添加到命令中了.
+</p>
+
+<p>
 编辑 <code>.lein/profiles.clj</code>, 在其中加入 <code>:emacs</code> 一项:
 </p>
 <div class="org-src-container">
 
 <pre class="src src-clojure">{ ...                                   ;; 其他的配置
  :emacs
- {:dependencies [[org.clojure/tools.nrepl "0.2.12"]
-                  ;; piggieback提供nrepl一致的CLJS REPL
+ {:dependencies [
+                 ;; [org.clojure/tools.nrepl "0.2.12"] 最新的cider中不在需要提供了
+                 ;; piggieback提供nrepl一致的CLJS REPL
                  [com.cemerick/piggieback "0.2.1"]]
-  :plugins [[cider/cider-nrepl "0.11.0-SNAPSHOT"]
+  :plugins [
+            ;; [cider/cider-nrepl "0.11.0-SNAPSHOT"] 最新的cider中不在需要提供了
             ;; clj-refactor依赖refactor-nrepl
             [refactor-nrepl "2.0.0-SNAPSHOT"]]
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}}
@@ -110,7 +116,7 @@
     <div>
       <div class="post-meta">
         <span title="post date" class="post-info">2016-02-19</span>
-        <span title="last modification date" class="post-info">2016-03-02</span>
+        <span title="last modification date" class="post-info">2016-03-08</span>
         <span title="tags" class="post-info"><a href="/tags/clojure/">clojure</a>, <a href="/tags/cider/">cider</a></span>
         <span title="author" class="post-info">DogLooksGood</span>
       </div>
