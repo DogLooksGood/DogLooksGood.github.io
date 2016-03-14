@@ -1,0 +1,38 @@
+#+TITLE: Datomic实现sort和limit
+#+DATE: 2016-03-14
+#+TAGS: clojure, datomic
+
+* Datomic的query中, 没有实现.
+https://groups.google.com/forum/#!topic/datomic/NgVviV9Sw8g
+这里说全部查出来然后直接内存中处理, 但这并不是一种好方法 - -#
+
+http://comments.gmane.org/gmane.comp.db.datomic.user/2256
+这里有一些关于 ~datoms~ 和 ~index-range~ 的讨论.
+
+http://clojurians-log.mantike.pro/datomic/2016-01-15.html
+这里有关于datomic没有 sort, offset, limit 的解释.
+
+http://stackoverflow.com/questions/27162566/equivalent-of-sql-limit-clause-in-datomic
+stackoverflow中的这个方法, 个人觉得比较好.
+* 使用seek-datoms
+~seek-datoms~ 会返回一个lazy-seq, 这样我们能做的事情就很多了.
+#+BEGIN_SRC clojure
+  ;; 使用 `AVET` 索引, 可以指定一到多个参数
+  (d/seek-datoms
+    (d/db conn)
+    :avet :user/username)
+  ;; 得到的`似乎`是按照username排序的lazy-seq
+  ;; 如果需要前3个. 并且需要追加其他属性
+  (let [db (d/db conn)]
+    (->> (d/seek-datoms
+           (d/db conn)
+           :avet :user/username)
+           (take 3)
+      (mapv #(d/pull db '[:user/status :db/id :user/username] (:e %)))))
+#+END_SRC
+
+* TODO 根据entity-id排序怎么做
+这个需要了解一下Datomic中的四种索引.
+
+未完待续.
+
