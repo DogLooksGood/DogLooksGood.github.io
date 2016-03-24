@@ -37,7 +37,9 @@
 #+END_EXAMPLE
 
 ** 连接到容器
+~--detach-keys~ 似乎有些问题, 版本应该足够, 目前原因不明.
+默认的detach用 ~ctrl-p ctrl-q~
 #+BEGIN_EXAMPLE
-  docker attach —detach-keys="ctrl-\\" <container>
+  docker attach --detach-keys="ctrl-\\" <container>
 #+END_EXAMPLE
 
