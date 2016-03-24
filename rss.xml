@@ -4,10 +4,17 @@
     <title>狗好看の世界</title>
     <link>https://DogLooksGood.github.io</link>
     <description>Less words, more attempting.</description>
-    <pubDate>Mon, 14 Mar 2016 23:41:56 CST</pubDate>
-    <lastBuildDate>Mon, 14 Mar 2016 23:41:56 CST</lastBuildDate>
+    <pubDate>Thu, 24 Mar 2016 10:51:13 CST</pubDate>
+    <lastBuildDate>Thu, 24 Mar 2016 10:51:13 CST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
+    <item>
+      <title>本狗的Docker尝试</title>
+      <link>https://DogLooksGood.github.io/blog/2016/02/23/docker</link>
+      <description><![CDATA[Docker的常用命令和配置]]></description>
+      <pubDate>2016-03-24</pubDate>
+      <guid>https://DogLooksGood.github.io/blog/2016/02/23/docker</guid>
+    </item>
     <item>
       <title>Datomic&#39;s sort and limit</title>
       <link>https://DogLooksGood.github.io/blog/2016/03/14/datomic&#39;s-sort-and-limit/</link>
@@ -442,13 +449,6 @@ stackoverflow中的这个方法, 个人觉得比较好.
       <description><![CDATA[Clojure中一些设计模式的实现]]></description>
       <pubDate>2016-02-23</pubDate>
       <guid>https://DogLooksGood.github.io/blog/2016/02/23/oop2fp</guid>
-    </item>
-    <item>
-      <title>本狗的Docker尝试</title>
-      <link>https://DogLooksGood.github.io/blog/2016/02/23/docker</link>
-      <description><![CDATA[Docker的常用命令和配置]]></description>
-      <pubDate>2016-02-23</pubDate>
-      <guid>https://DogLooksGood.github.io/blog/2016/02/23/docker</guid>
     </item>
     <item>
       <title>Rum - 一个简单,灵活,可扩展的ClojureScript的React实现</title>

@@ -44,22 +44,81 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">先占个位置</a></li>
-<li><a href="#orgheadline2">如何方便退出docker的shell但是不终止.</a></li>
+<li><a href="#orgheadline7">常用的命令</a>
+<ul>
+<li><a href="#orgheadline1">列出现有的镜像</a></li>
+<li><a href="#orgheadline2">删除一个镜像</a></li>
+<li><a href="#orgheadline3">从镜像创建一个容器</a></li>
+<li><a href="#orgheadline4">列出所有的容器</a></li>
+<li><a href="#orgheadline5">删除一个容器</a></li>
+<li><a href="#orgheadline6">连接到容器</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">先占个位置</h2>
+<div id="outline-container-orgheadline7" class="outline-2">
+<h2 id="orgheadline7">常用的命令</h2>
+<div class="outline-text-2" id="text-orgheadline7">
+</div><div id="outline-container-orgheadline1" class="outline-3">
+<h3 id="orgheadline1">列出现有的镜像</h3>
+<div class="outline-text-3" id="text-orgheadline1">
+<pre class="example">
+docker images
+</pre>
+</div>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">如何方便退出docker的shell但是不终止.</h2>
-<div class="outline-text-2" id="text-orgheadline2">
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2">删除一个镜像</h3>
+<div class="outline-text-3" id="text-orgheadline2">
+<pre class="example">
+docker rmi &lt;image&gt;
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3">从镜像创建一个容器</h3>
+<div class="outline-text-3" id="text-orgheadline3">
 <p>
-sudo docker attach —detach-keys="ctrl-\\" machine-name
+端口映射?
 </p>
+<pre class="example">
+docker run -itP --name &lt;container&gt; &lt;image&gt;
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4">列出所有的容器</h3>
+<div class="outline-text-3" id="text-orgheadline4">
+<pre class="example">
+docker ps
+</pre>
+<ul class="org-ul">
+<li>-a: 包含已经停止的</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5">删除一个容器</h3>
+<div class="outline-text-3" id="text-orgheadline5">
+<pre class="example">
+docker rm &lt;container&gt;
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6">连接到容器</h3>
+<div class="outline-text-3" id="text-orgheadline6">
+<pre class="example">
+docker attach —detach-keys="ctrl-\\" &lt;container&gt;
+</pre>
+</div>
 </div>
 </div>
 
@@ -68,7 +127,7 @@ sudo docker attach —detach-keys="ctrl-\\" machine-name
     <div>
       <div class="post-meta">
         <span title="post date" class="post-info">2016-02-23</span>
-        <span title="last modification date" class="post-info">2016-02-23</span>
+        <span title="last modification date" class="post-info">2016-03-24</span>
         <span title="tags" class="post-info"><a href="/tags/docker/">docker</a></span>
         <span title="author" class="post-info">DogLooksGood</span>
       </div>
