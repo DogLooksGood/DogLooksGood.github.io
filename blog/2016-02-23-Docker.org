@@ -8,7 +8,36 @@
 #+OPTIONS:     H:3 num:nil toc:t \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
 #+DESCRIPTION: Docker的常用命令和配置
 
-* 先占个位置
+* 常用的命令
+** 列出现有的镜像
+#+BEGIN_EXAMPLE
+  docker images
+#+END_EXAMPLE
 
-* 如何方便退出docker的shell但是不终止.
-sudo docker attach —detach-keys="ctrl-\\" machine-name
+** 删除一个镜像
+#+BEGIN_EXAMPLE
+  docker rmi <image>
+#+END_EXAMPLE
+
+** 从镜像创建一个容器
+端口映射?
+#+BEGIN_EXAMPLE
+  docker run -itP --name <container> <image>
+#+END_EXAMPLE
+
+** 列出所有的容器
+#+BEGIN_EXAMPLE
+  docker ps
+#+END_EXAMPLE
+- -a: 包含已经停止的
+
+** 删除一个容器
+#+BEGIN_EXAMPLE
+  docker rm <container>
+#+END_EXAMPLE
+
+** 连接到容器
+#+BEGIN_EXAMPLE
+  docker attach —detach-keys="ctrl-\\" <container>
+#+END_EXAMPLE
+
