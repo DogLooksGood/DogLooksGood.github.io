@@ -1,0 +1,45 @@
+#+TITLE: 本狗的Docker尝试
+#+DATE: 2016-02-23
+#+EMAIL:       DogLooksGood@localhost
+#+URI:         /blog/%y/%m/%d/docker
+#+KEYWORDS:    docker
+#+TAGS:        docker
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:t \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: Docker的常用命令和配置
+
+* 常用的命令
+** 列出现有的镜像
+#+BEGIN_EXAMPLE
+  docker images
+#+END_EXAMPLE
+
+** 删除一个镜像
+#+BEGIN_EXAMPLE
+  docker rmi <image>
+#+END_EXAMPLE
+
+** 从镜像创建一个容器
+端口映射?
+#+BEGIN_EXAMPLE
+  docker run -itP --name <container> <image>
+#+END_EXAMPLE
+
+** 列出所有的容器
+#+BEGIN_EXAMPLE
+  docker ps
+#+END_EXAMPLE
+- -a: 包含已经停止的
+
+** 删除一个容器
+#+BEGIN_EXAMPLE
+  docker rm <container>
+#+END_EXAMPLE
+
+** 连接到容器
+~--detach-keys~ 似乎有些问题, 版本应该足够, 目前原因不明.
+默认的detach用 ~ctrl-p ctrl-q~
+#+BEGIN_EXAMPLE
+  docker attach --detach-keys="ctrl-\\" <container>
+#+END_EXAMPLE
+
