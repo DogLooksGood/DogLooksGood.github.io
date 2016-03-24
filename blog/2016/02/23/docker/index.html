@@ -115,8 +115,12 @@ docker rm &lt;container&gt;
 <div id="outline-container-orgheadline6" class="outline-3">
 <h3 id="orgheadline6">连接到容器</h3>
 <div class="outline-text-3" id="text-orgheadline6">
+<p>
+<code>--detach-keys</code> 似乎有些问题, 版本应该足够, 目前原因不明.
+默认的detach用 <code>ctrl-p ctrl-q</code>
+</p>
 <pre class="example">
-docker attach —detach-keys="ctrl-\\" &lt;container&gt;
+docker attach --detach-keys="ctrl-\\" &lt;container&gt;
 </pre>
 </div>
 </div>
