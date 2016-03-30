@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <title>Datomic&#39;s sort and limit - 狗好看の世界</title>
+    <title>常用的命令行工具 - 狗好看の世界</title>
     <meta charset="utf-8" />
     <meta name="author" content="DogLooksGood" />
     <link rel="stylesheet" href="/media/css/main.css" type="text/css">
@@ -37,95 +37,41 @@
 
 <div>
 <div class="post">
-<h1>Datomic&#39;s sort and limit</h1>
+<h1>常用的命令行工具</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">Datomic的query中, 没有实现.</a></li>
-<li><a href="#orgheadline2">使用seek-datoms</a></li>
-<li><a href="#orgheadline3"><span class="done DONE">DONE</span> 根据entity-id排序怎么做</a></li>
+<li><a href="#orgheadline1">Fish Shell</a></li>
+<li><a href="#orgheadline2">Tmux</a></li>
 </ul>
 </div>
 </div>
 
 <div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">Datomic的query中, 没有实现.</h2>
+<h2 id="orgheadline1">Fish Shell</h2>
 <div class="outline-text-2" id="text-orgheadline1">
 <p>
-<a href="https://groups.google.com/forum/#!topic/datomic/NgVviV9Sw8g">https://groups.google.com/forum/#!topic/datomic/NgVviV9Sw8g</a>
-这里说全部查出来然后直接内存中处理, 但这并不是一种好方法 - -#
+使用Root权限, 用下面的命令安装:
 </p>
-
-<p>
-<a href="http://comments.gmane.org/gmane.comp.db.datomic.user/2256">http://comments.gmane.org/gmane.comp.db.datomic.user/2256</a>
-这里有一些关于 <code>datoms</code> 和 <code>index-range</code> 的讨论.
-</p>
-
-<p>
-<a href="http://clojurians-log.mantike.pro/datomic/2016-01-15.html">http://clojurians-log.mantike.pro/datomic/2016-01-15.html</a>
-这里有关于datomic没有 sort, offset, limit 的解释.
-</p>
-
-<p>
-<a href="http://stackoverflow.com/questions/27162566/equivalent-of-sql-limit-clause-in-datomic">http://stackoverflow.com/questions/27162566/equivalent-of-sql-limit-clause-in-datomic</a>
-stackoverflow中的这个方法, 个人觉得比较好.
-</p>
+<pre class="example">
+yum-config-manager --add-repo http://fishshell.com/files/linux/RedHat_RHEL-6/fish.release:2.repo
+yum install fish
+</pre>
 </div>
 </div>
+
 <div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">使用seek-datoms</h2>
-<div class="outline-text-2" id="text-orgheadline2">
-<p>
-<code>seek-datoms</code> 会返回一个lazy-seq, 这样我们能做的事情就很多了.
-</p>
-<div class="org-src-container">
-
-<pre class="src src-clojure">;; 使用 `AVET` 索引, 可以指定一到多个参数
-(d/seek-datoms
-  (d/db conn)
-  :avet :user/username)
-;; 得到的`似乎`是按照username排序的lazy-seq
-;; 如果需要前3个. 并且需要追加其他属性
-(let [db (d/db conn)]
-  (-&gt;&gt; (d/seek-datoms
-         (d/db conn)
-         :avet :user/username)
-         (take 3)
-    (mapv #(d/pull db '[:user/status :db/id :user/username] (:e %)))))
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-orgheadline3" class="outline-2">
-<h2 id="orgheadline3"><span class="done DONE">DONE</span> 根据entity-id排序怎么做</h2>
-<div class="outline-text-2" id="text-orgheadline3">
-<ul class="org-ul">
-<li>State "DONE"       from "TODO"       <span class="timestamp-wrapper"><span class="timestamp">[2016-03-14 Mon 23:34]</span></span></li>
-</ul>
-<p>
-使用 <code>d/datoms</code> 和 <code>AEVT</code> 索引
-</p>
-<div class="org-src-container">
-
-<pre class="src src-clojure">(d/datoms (d/db conn)
-  :aevt :user/username)
-</pre>
-</div>
-<p>
-这个会获取所有有 :user/username 属性的, 按照entity-id排序的datom.
-</p>
-</div>
+<h2 id="orgheadline2">Tmux</h2>
 </div>
 
 </div>
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-03-14</span>
-        <span title="last modification date" class="post-info">2016-03-14</span>
-        <span title="tags" class="post-info"><a href="/tags/clojure/">clojure</a>, <a href="/tags/datomic/">datomic</a></span>
+        <span title="post date" class="post-info">2016-03-24</span>
+        <span title="last modification date" class="post-info">2016-03-30</span>
+        <span title="tags" class="post-info"><a href="/tags/linux/">linux</a></span>
         <span title="author" class="post-info">DogLooksGood</span>
       </div>
       <section>

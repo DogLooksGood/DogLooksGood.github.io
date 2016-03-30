@@ -54,6 +54,23 @@
 <li><a href="#orgheadline6">连接到容器</a></li>
 </ul>
 </li>
+<li><a href="#orgheadline8">搭建一个用来开发的Docker镜像.</a>
+<ul>
+<li><a href="#orgheadline10">运行环境</a>
+<ul>
+<li><a href="#orgheadline9">Python</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline15">安装工具</a>
+<ul>
+<li><a href="#orgheadline11">Ag</a></li>
+<li><a href="#orgheadline12">tmux</a></li>
+<li><a href="#orgheadline13">Git</a></li>
+<li><a href="#orgheadline14">fish</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -126,12 +143,73 @@ docker attach --detach-keys="ctrl-\\" &lt;container&gt;
 </div>
 </div>
 
+<div id="outline-container-orgheadline8" class="outline-2">
+<h2 id="orgheadline8">搭建一个用来开发的Docker镜像.</h2>
+<div class="outline-text-2" id="text-orgheadline8">
+<p>
+使用的ubuntu的镜像作为基础.
+</p>
+</div>
+<div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10">运行环境</h3>
+<div class="outline-text-3" id="text-orgheadline10">
+</div><div id="outline-container-orgheadline9" class="outline-4">
+<h4 id="orgheadline9">Python</h4>
+<div class="outline-text-4" id="text-orgheadline9">
+<pre class="example">
+apt-get install python2.7
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline15" class="outline-3">
+<h3 id="orgheadline15">安装工具</h3>
+<div class="outline-text-3" id="text-orgheadline15">
+</div><div id="outline-container-orgheadline11" class="outline-4">
+<h4 id="orgheadline11">Ag</h4>
+<div class="outline-text-4" id="text-orgheadline11">
+<pre class="example">
+apt-get install silversearcher-ag
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline12" class="outline-4">
+<h4 id="orgheadline12">tmux</h4>
+<div class="outline-text-4" id="text-orgheadline12">
+<pre class="example">
+apt-get install tmux
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline13" class="outline-4">
+<h4 id="orgheadline13">Git</h4>
+<div class="outline-text-4" id="text-orgheadline13">
+<pre class="example">
+apt-get install git
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline14" class="outline-4">
+<h4 id="orgheadline14">fish</h4>
+<div class="outline-text-4" id="text-orgheadline14">
+<pre class="example">
+apt-get install fish
+</pre>
+</div>
+</div>
+</div>
+</div>
+
 </div>
 </div>
     <div>
       <div class="post-meta">
         <span title="post date" class="post-info">2016-02-23</span>
-        <span title="last modification date" class="post-info">2016-03-24</span>
+        <span title="last modification date" class="post-info">2016-03-30</span>
         <span title="tags" class="post-info"><a href="/tags/docker/">docker</a></span>
         <span title="author" class="post-info">DogLooksGood</span>
       </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <title>Datomic&#39;s sort and limit - 狗好看の世界</title>
+    <title>Customize_Reader_Function - 狗好看の世界</title>
     <meta charset="utf-8" />
     <meta name="author" content="DogLooksGood" />
     <link rel="stylesheet" href="/media/css/main.css" type="text/css">
@@ -37,85 +37,103 @@
 
 <div>
 <div class="post">
-<h1>Datomic&#39;s sort and limit</h1>
+<h1>Customize_Reader_Function</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">Datomic的query中, 没有实现.</a></li>
-<li><a href="#orgheadline2">使用seek-datoms</a></li>
-<li><a href="#orgheadline3"><span class="done DONE">DONE</span> 根据entity-id排序怎么做</a></li>
+<li><a href="#orgheadline3">自定义的EDN读取函数.</a>
+<ul>
+<li><a href="#orgheadline1">需求</a></li>
+<li><a href="#orgheadline2">解决方案</a></li>
 </ul>
-</div>
-</div>
-
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1">Datomic的query中, 没有实现.</h2>
-<div class="outline-text-2" id="text-orgheadline1">
-<p>
-<a href="https://groups.google.com/forum/#!topic/datomic/NgVviV9Sw8g">https://groups.google.com/forum/#!topic/datomic/NgVviV9Sw8g</a>
-这里说全部查出来然后直接内存中处理, 但这并不是一种好方法 - -#
-</p>
-
-<p>
-<a href="http://comments.gmane.org/gmane.comp.db.datomic.user/2256">http://comments.gmane.org/gmane.comp.db.datomic.user/2256</a>
-这里有一些关于 <code>datoms</code> 和 <code>index-range</code> 的讨论.
-</p>
-
-<p>
-<a href="http://clojurians-log.mantike.pro/datomic/2016-01-15.html">http://clojurians-log.mantike.pro/datomic/2016-01-15.html</a>
-这里有关于datomic没有 sort, offset, limit 的解释.
-</p>
-
-<p>
-<a href="http://stackoverflow.com/questions/27162566/equivalent-of-sql-limit-clause-in-datomic">http://stackoverflow.com/questions/27162566/equivalent-of-sql-limit-clause-in-datomic</a>
-stackoverflow中的这个方法, 个人觉得比较好.
-</p>
-</div>
-</div>
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2">使用seek-datoms</h2>
-<div class="outline-text-2" id="text-orgheadline2">
-<p>
-<code>seek-datoms</code> 会返回一个lazy-seq, 这样我们能做的事情就很多了.
-</p>
-<div class="org-src-container">
-
-<pre class="src src-clojure">;; 使用 `AVET` 索引, 可以指定一到多个参数
-(d/seek-datoms
-  (d/db conn)
-  :avet :user/username)
-;; 得到的`似乎`是按照username排序的lazy-seq
-;; 如果需要前3个. 并且需要追加其他属性
-(let [db (d/db conn)]
-  (-&gt;&gt; (d/seek-datoms
-         (d/db conn)
-         :avet :user/username)
-         (take 3)
-    (mapv #(d/pull db '[:user/status :db/id :user/username] (:e %)))))
-</pre>
-</div>
+</li>
+</ul>
 </div>
 </div>
 
 <div id="outline-container-orgheadline3" class="outline-2">
-<h2 id="orgheadline3"><span class="done DONE">DONE</span> 根据entity-id排序怎么做</h2>
+<h2 id="orgheadline3">自定义的EDN读取函数.</h2>
 <div class="outline-text-2" id="text-orgheadline3">
-<ul class="org-ul">
-<li>State "DONE"       from "TODO"       <span class="timestamp-wrapper"><span class="timestamp">[2016-03-14 Mon 23:34]</span></span></li>
-</ul>
+</div><div id="outline-container-orgheadline1" class="outline-3">
+<h3 id="orgheadline1">需求</h3>
+<div class="outline-text-3" id="text-orgheadline1">
 <p>
-使用 <code>d/datoms</code> 和 <code>AEVT</code> 索引
+有时需要在EDN的数据结构中, 写一些自定义的类型.
+如果使用 <code>(:some-type x)</code> 或者 <code>[:some-tye x]</code>, 不好处理. 
+理想的情况是我们读取到数据的时候, 直接将其转换成对应的类型.
+而不是用传统的方式, 先将数据处理成普通的数据结构, 再逐步处理特定的部分.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2">解决方案</h3>
+<div class="outline-text-3" id="text-orgheadline2">
+<p>
+使用自定义的 reader function.
+假设我们接受的数据结构(EDN字符串)如下:
 </p>
 <div class="org-src-container">
 
-<pre class="src src-clojure">(d/datoms (d/db conn)
-  :aevt :user/username)
+<pre class="src src-clojure">[{:name "Dog.LooksGood"
+  :age 18}
+ {:name "Foo.Bar"
+  :age 16}]
 </pre>
 </div>
 <p>
-这个会获取所有有 :user/username 属性的, 按照entity-id排序的datom.
+我们希望得到
 </p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">[{:name {:first "Dog"
+         :last "LooksGood"}
+  :age 18}
+ {:name {:first "Foo"
+         :last "Bar"}
+  :age 16}]
+</pre>
+</div>
+<p>
+首先, 我们自定义一个标签 <code>#name</code> 来标识一种特殊的数据处理方式.
+接受的数据应该应该为
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">[{:name #name "Dog.LooksGood"
+    :age 18}
+   {:name #name "Foo.Bar"
+    :age 16}]
+</pre>
+</div>
+<p>
+使用 <code>clojure.edn/read-string</code> 的时候, 传入自定义reader function.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(require '[clojure.edn :as edn])
+
+;; EDN数据
+(def edn-string
+  "[{:name #name \"Dog.LooksGood\"
+      :age 18}
+     {:name #name \"Foo.Bar\"
+      :age 16}]")
+
+;; 自定义reader
+(defn parse-name [name]
+  (let [[f l] (clojure.string/split name #"\.")]
+    {:first f
+     :last l}))
+
+(edn/read-string
+  {:readers {'name parse-name}}
+  edn-string)
+;; =&gt;[{:name {:first "Dog", :last "LooksGood"}, :age 18} {:name {:first "Foo", :last "Bar"}, :age 16}]
+</pre>
+</div>
+</div>
 </div>
 </div>
 
@@ -123,9 +141,9 @@ stackoverflow中的这个方法, 个人觉得比较好.
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-03-14</span>
-        <span title="last modification date" class="post-info">2016-03-14</span>
-        <span title="tags" class="post-info"><a href="/tags/clojure/">clojure</a>, <a href="/tags/datomic/">datomic</a></span>
+        <span title="post date" class="post-info">2016-03-30</span>
+        <span title="last modification date" class="post-info">2016-03-30</span>
+        <span title="tags" class="post-info"><a href="/tags/clojure/">clojure</a></span>
         <span title="author" class="post-info">DogLooksGood</span>
       </div>
       <section>
