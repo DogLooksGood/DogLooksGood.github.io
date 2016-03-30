@@ -1,0 +1,14 @@
+#+TITLE: 常用的命令行工具
+#+DATE: 2016-03-24
+#+TAGS: linux
+
+* Fish Shell
+使用Root权限, 用下面的命令安装:
+#+BEGIN_EXAMPLE
+  yum-config-manager --add-repo http://fishshell.com/files/linux/RedHat_RHEL-6/fish.release:2.repo
+  yum install fish
+#+END_EXAMPLE
+
+* Tmux
+
+

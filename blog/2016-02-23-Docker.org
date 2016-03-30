@@ -43,3 +43,31 @@
   docker attach --detach-keys="ctrl-\\" <container>
 #+END_EXAMPLE
 
+* 搭建一个用来开发的Docker镜像.
+使用的ubuntu的镜像作为基础.
+** 运行环境
+*** Python
+#+BEGIN_EXAMPLE
+  apt-get install python2.7
+#+END_EXAMPLE
+
+** 安装工具
+*** Ag 
+#+BEGIN_EXAMPLE
+  apt-get install silversearcher-ag
+#+END_EXAMPLE
+
+*** tmux
+#+BEGIN_EXAMPLE
+  apt-get install tmux
+#+END_EXAMPLE
+
+*** Git
+#+BEGIN_EXAMPLE
+  apt-get install git
+#+END_EXAMPLE
+
+*** fish
+#+BEGIN_EXAMPLE
+  apt-get install fish
+#+END_EXAMPLE
