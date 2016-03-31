@@ -1,15 +1,14 @@
-#+TITLE: Customize_Reader_Function
+#+TITLE: 自定义EDN的reader function
 #+DATE: 2016-03-30
 #+TAGS: clojure
 
-* 自定义的EDN读取函数.
-** 需求
+* 需求
 有时需要在EDN的数据结构中, 写一些自定义的类型.
 如果使用 ~(:some-type x)~ 或者 ~[:some-tye x]~, 不好处理. 
 理想的情况是我们读取到数据的时候, 直接将其转换成对应的类型.
 而不是用传统的方式, 先将数据处理成普通的数据结构, 再逐步处理特定的部分.
 
-** 解决方案
+* 解决方案
 使用自定义的 reader function.
 假设我们接受的数据结构(EDN字符串)如下:
 #+BEGIN_SRC clojure
