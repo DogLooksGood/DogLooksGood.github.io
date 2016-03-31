@@ -1,7 +1,7 @@
-#+TITLE: Thought_For_Fast_Develop
+#+TITLE: 关于快速开发的构思
 #+DATE: 2016-03-31
 #+TAGS:clojure
-#+TITLE: 构思
+
 
 * API
 ** CLJC
@@ -16,7 +16,7 @@
 
 *defcommand* 定义command
 #+BEGIN_SRC clojure
-  (defcommand stack-publish->
+  (defcommand publish-stack->
     {:stack/content       s/Str
      :stack/title         s/Str})
 #+END_SRC
@@ -38,7 +38,7 @@
 - subscribe 发送query/subscribe. GET请求到服务器, 返回查询结果.
 #+BEGIN_SRC clojure
   ;; Dispatch Command
-  (dispatch stack-publish->
+  (dispatch publish-stack->
     {:stack/content "Clojure is awesome!"
      :stack/title "Hello"})
 
