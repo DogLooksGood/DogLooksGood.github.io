@@ -4,10 +4,112 @@
     <title>狗好看の世界</title>
     <link>https://DogLooksGood.github.io</link>
     <description>Less words, more attempting.</description>
-    <pubDate>Thu, 31 Mar 2016 22:51:42 CST</pubDate>
-    <lastBuildDate>Thu, 31 Mar 2016 22:51:42 CST</lastBuildDate>
+    <pubDate>Thu, 31 Mar 2016 22:54:06 CST</pubDate>
+    <lastBuildDate>Thu, 31 Mar 2016 22:54:06 CST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
+    <item>
+      <title>自定义EDN的reader function</title>
+      <link>https://DogLooksGood.github.io/blog/2016/03/30/自定义edn的reader-function/</link>
+      <description><![CDATA[<div>
+<div class="post">
+<h1>自定义EDN的reader function</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline1">需求</a></li>
+<li><a href="#orgheadline2">解决方案</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1">需求</h2>
+<div class="outline-text-2" id="text-orgheadline1">
+<p>
+有时需要在EDN的数据结构中, 写一些自定义的类型.
+如果使用 <code>(:some-type x)</code> 或者 <code>[:some-tye x]</code>, 不好处理. 
+理想的情况是我们读取到数据的时候, 直接将其转换成对应的类型.
+而不是用传统的方式, 先将数据处理成普通的数据结构, 再逐步处理特定的部分.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2">解决方案</h2>
+<div class="outline-text-2" id="text-orgheadline2">
+<p>
+使用自定义的 reader function.
+假设我们接受的数据结构(EDN字符串)如下:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">[{:name "Dog.LooksGood"
+  :age 18}
+ {:name "Foo.Bar"
+  :age 16}]
+</pre>
+</div>
+<p>
+我们希望得到
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">[{:name {:first "Dog"
+         :last "LooksGood"}
+  :age 18}
+ {:name {:first "Foo"
+         :last "Bar"}
+  :age 16}]
+</pre>
+</div>
+<p>
+首先, 我们自定义一个标签 <code>#name</code> 来标识一种特殊的数据处理方式.
+接受的数据应该应该为
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">[{:name #name "Dog.LooksGood"
+    :age 18}
+   {:name #name "Foo.Bar"
+    :age 16}]
+</pre>
+</div>
+<p>
+使用 <code>clojure.edn/read-string</code> 的时候, 传入自定义reader function.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(require '[clojure.edn :as edn])
+
+;; EDN数据
+(def edn-string
+  "[{:name #name \"Dog.LooksGood\"
+      :age 18}
+     {:name #name \"Foo.Bar\"
+      :age 16}]")
+
+;; 自定义reader
+(defn parse-name [name]
+  (let [[f l] (clojure.string/split name #"\.")]
+    {:first f
+     :last l}))
+
+(edn/read-string
+  {:readers {'name parse-name}}
+  edn-string)
+;; =&gt;[{:name {:first "Dog", :last "LooksGood"}, :age 18} {:name {:first "Foo", :last "Bar"}, :age 16}]
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>]]></description>
+      <pubDate>2016-03-31</pubDate>
+      <guid>https://DogLooksGood.github.io/blog/2016/03/30/自定义edn的reader-function/</guid>
+    </item>
     <item>
       <title>关于快速开发的构思</title>
       <link>https://DogLooksGood.github.io/blog/2016/03/31/关于快速开发的构思/</link>
@@ -199,116 +301,6 @@
       <description><![CDATA[Docker的常用命令和配置]]></description>
       <pubDate>2016-03-30</pubDate>
       <guid>https://DogLooksGood.github.io/blog/2016/02/23/docker</guid>
-    </item>
-    <item>
-      <title>Customize_Reader_Function</title>
-      <link>https://DogLooksGood.github.io/blog/2016/03/30/customize_reader_function/</link>
-      <description><![CDATA[<div>
-<div class="post">
-<h1>Customize_Reader_Function</h1>
-<div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li><a href="#orgheadline3">自定义的EDN读取函数.</a>
-<ul>
-<li><a href="#orgheadline1">需求</a></li>
-<li><a href="#orgheadline2">解决方案</a></li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-orgheadline3" class="outline-2">
-<h2 id="orgheadline3">自定义的EDN读取函数.</h2>
-<div class="outline-text-2" id="text-orgheadline3">
-</div><div id="outline-container-orgheadline1" class="outline-3">
-<h3 id="orgheadline1">需求</h3>
-<div class="outline-text-3" id="text-orgheadline1">
-<p>
-有时需要在EDN的数据结构中, 写一些自定义的类型.
-如果使用 <code>(:some-type x)</code> 或者 <code>[:some-tye x]</code>, 不好处理. 
-理想的情况是我们读取到数据的时候, 直接将其转换成对应的类型.
-而不是用传统的方式, 先将数据处理成普通的数据结构, 再逐步处理特定的部分.
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgheadline2" class="outline-3">
-<h3 id="orgheadline2">解决方案</h3>
-<div class="outline-text-3" id="text-orgheadline2">
-<p>
-使用自定义的 reader function.
-假设我们接受的数据结构(EDN字符串)如下:
-</p>
-<div class="org-src-container">
-
-<pre class="src src-clojure">[{:name "Dog.LooksGood"
-  :age 18}
- {:name "Foo.Bar"
-  :age 16}]
-</pre>
-</div>
-<p>
-我们希望得到
-</p>
-<div class="org-src-container">
-
-<pre class="src src-clojure">[{:name {:first "Dog"
-         :last "LooksGood"}
-  :age 18}
- {:name {:first "Foo"
-         :last "Bar"}
-  :age 16}]
-</pre>
-</div>
-<p>
-首先, 我们自定义一个标签 <code>#name</code> 来标识一种特殊的数据处理方式.
-接受的数据应该应该为
-</p>
-<div class="org-src-container">
-
-<pre class="src src-clojure">[{:name #name "Dog.LooksGood"
-    :age 18}
-   {:name #name "Foo.Bar"
-    :age 16}]
-</pre>
-</div>
-<p>
-使用 <code>clojure.edn/read-string</code> 的时候, 传入自定义reader function.
-</p>
-<div class="org-src-container">
-
-<pre class="src src-clojure">(require '[clojure.edn :as edn])
-
-;; EDN数据
-(def edn-string
-  "[{:name #name \"Dog.LooksGood\"
-      :age 18}
-     {:name #name \"Foo.Bar\"
-      :age 16}]")
-
-;; 自定义reader
-(defn parse-name [name]
-  (let [[f l] (clojure.string/split name #"\.")]
-    {:first f
-     :last l}))
-
-(edn/read-string
-  {:readers {'name parse-name}}
-  edn-string)
-;; =&gt;[{:name {:first "Dog", :last "LooksGood"}, :age 18} {:name {:first "Foo", :last "Bar"}, :age 16}]
-</pre>
-</div>
-</div>
-</div>
-</div>
-
-</div>
-</div>]]></description>
-      <pubDate>2016-03-30</pubDate>
-      <guid>https://DogLooksGood.github.io/blog/2016/03/30/customize_reader_function/</guid>
     </item>
     <item>
       <title>常用的命令行工具</title>
