@@ -40,16 +40,16 @@
 <h1>About 狗好看</h1>
 <div class="org-src-container">
 
-<pre class="src src-clojure">(def ^:const DOGLOOKSGOOD
+<pre class="src src-clojure">(def ^{:const true :private true} DOGLOOKSGOOD
   {:name "Tianshu Shi"
    :description "A stupid Coder who loves dog"
-   :tools [[NeoVim Tmux Fish]
+   :tools [[NeoVim Tmux Zsh Fzf]
            [Emacs]
            [IntelliJ_IDEA]]
-   :major #{Python Clojure}
+   :major #{Python Clojure Java}
    :direction :full-stack
-   :favor (lazy-cat ["Comics" "StarcraftII"]
-                    (map :interested #'what-ever))
+   :favor (lazy-cat ["Comics" "StarcraftII" "RabbitBreakingEgg"]
+                    (filter :interested #'what-ever))
    :dream `(str "something new, made by"
                 ~(:name DOGLOOKSGOOD))})
 </pre>
