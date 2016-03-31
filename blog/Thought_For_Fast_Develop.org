@@ -1,0 +1,92 @@
+#+TITLE: Thought_For_Fast_Develop
+#+DATE: 2016-03-31
+#+TAGS:clojure
+#+TITLE: 构思
+
+* API
+** CLJC
+*** 提供的API.
+*defquery* 定义query
+#+BEGIN_SRC clojure
+  (defquery <-stack-detail
+    {:db/id        s/Int
+     :size         s/Int
+     :author       s/Keyword})
+#+END_SRC
+
+*defcommand* 定义command
+#+BEGIN_SRC clojure
+  (defcommand stack-publish->
+    {:stack/content       s/Str
+     :stack/title         s/Str})
+#+END_SRC
+
+** CLJS
+*** 需要提供的配置.
+- get, 用来发送query/fetch, query/subscribe请求.
+- post, 用来发送command/dispatch请求.
+- ws-handler, 用来处理update/push, command/sync.
+#+BEGIN_SRC clojure
+  (let [{:keys [ws-handler] (setup {:get get-fn :post post-fn})}]
+    ;; Start Websocket loop
+    (sente/start-chsk-router! ch-recv ws-handler))
+#+END_SRC
+
+*** 提供的API.
+- dispatch 发送command/dispatch. POST请求到服务器. 响应时同步command的状态.
+- fetch 发送query/fetch. GET请求到服务器, 返回查询结果.
+- subscribe 发送query/subscribe. GET请求到服务器, 返回查询结果.
+#+BEGIN_SRC clojure
+  ;; Dispatch Command
+  (dispatch stack-publish->
+    {:stack/content "Clojure is awesome!"
+     :stack/title "Hello"})
+
+  ;; Fetch Query
+  (fetch <-stack-detail
+    {:db/id  10
+     :size   50
+     :author :all})
+
+  ;; Subscribe Query
+  (subscribe <-stack-detail
+    {:db/id  10
+     :size   30
+     :author :all})
+#+END_SRC
+
+** CLJ
+*** 需要提供的配置.
+- get-handler, 用来对接query/fetch
+- post-handler, 用来对接command/dispatch请求.
+- ws-send, 用来推送update/push和command/sync.
+#+BEGIN_SRC clojure
+  (let [{:keys [get-handler post-handler tx-handler sync-command]} (setup {:ws-send ws-send})]
+    (defroute route
+      (GET "/api" get-handler)
+      (POST "/api" post-handler)))
+#+END_SRC
+
+*** 回调
+- register-query-handler
+- register-command-handler
+#+BEGIN_SRC clojure
+  (register-query-handler <-stack-detail
+    {:query (fn [env params]
+              ;; do sth
+              {:value xxx}
+              )
+     :query-tx (fn [env params]
+                 ;; do sth
+                 {:delta xxx}
+                 )})
+
+  (register-command-handler publish-stack->
+    (fn [env params]
+      ;; do sth
+      {:status xxx}
+      ))
+
+  ;; Other Situations.
+  (sync-command publish-stack-> :finish)
+#+END_SRC
