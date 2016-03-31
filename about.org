@@ -8,7 +8,8 @@
      :tools [[NeoVim Tmux Zsh Fzf]
              [Emacs]
              [IntelliJ_IDEA]]
-     :major #{Python Clojure Java}
+     :major #{Clojure Python Java}
+     :minor #{ES6 Scala Qt Cplusplus}
      :direction :full-stack
      :favor (lazy-cat ["Comics" "StarcraftII" "RabbitBreakingEgg"]
                       (filter :interested #'what-ever))
