@@ -1,6 +1,6 @@
 #+TITLE: 自定义EDN的reader function
 #+DATE: 2016-03-30
-#+TAGS: clojure
+#+TAGS: clojure, edn
 
 * 需求
 有时需要在EDN的数据结构中, 写一些自定义的类型.
