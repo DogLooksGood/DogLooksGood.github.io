@@ -4,10 +4,194 @@
     <title>狗好看の世界</title>
     <link>https://DogLooksGood.github.io</link>
     <description>Less words, more attempting.</description>
-    <pubDate>Wed, 30 Mar 2016 14:18:17 CST</pubDate>
-    <lastBuildDate>Wed, 30 Mar 2016 14:18:17 CST</lastBuildDate>
+    <pubDate>Thu, 31 Mar 2016 22:41:03 CST</pubDate>
+    <lastBuildDate>Thu, 31 Mar 2016 22:41:03 CST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
+    <item>
+      <title>Thought_For_Fast_Develop</title>
+      <link>https://DogLooksGood.github.io/blog/2016/03/31/thought_for_fast_develop/</link>
+      <description><![CDATA[<div>
+<div class="post">
+<h1>Thought_For_Fast_Develop</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline9">API</a>
+<ul>
+<li><a href="#orgheadline2">CLJC</a>
+<ul>
+<li><a href="#orgheadline1">提供的API.</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline5">CLJS</a>
+<ul>
+<li><a href="#orgheadline3">需要提供的配置.</a></li>
+<li><a href="#orgheadline4">提供的API.</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline8">CLJ</a>
+<ul>
+<li><a href="#orgheadline6">需要提供的配置.</a></li>
+<li><a href="#orgheadline7">回调</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline9" class="outline-2">
+<h2 id="orgheadline9">API</h2>
+<div class="outline-text-2" id="text-orgheadline9">
+</div><div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2">CLJC</h3>
+<div class="outline-text-3" id="text-orgheadline2">
+</div><div id="outline-container-orgheadline1" class="outline-4">
+<h4 id="orgheadline1">提供的API.</h4>
+<div class="outline-text-4" id="text-orgheadline1">
+<p>
+<b>defquery</b> 定义query
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defquery &lt;-stack-detail
+  {:db/id        s/Int
+   :size         s/Int
+   :author       s/Keyword})
+</pre>
+</div>
+
+<p>
+<b>defcommand</b> 定义command
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defcommand stack-publish-&gt;
+  {:stack/content       s/Str
+   :stack/title         s/Str})
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5">CLJS</h3>
+<div class="outline-text-3" id="text-orgheadline5">
+</div><div id="outline-container-orgheadline3" class="outline-4">
+<h4 id="orgheadline3">需要提供的配置.</h4>
+<div class="outline-text-4" id="text-orgheadline3">
+<ul class="org-ul">
+<li>get, 用来发送query/fetch, query/subscribe请求.</li>
+<li>post, 用来发送command/dispatch请求.</li>
+<li>ws-handler, 用来处理update/push, command/sync.</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(let [{:keys [ws-handler] (setup {:get get-fn :post post-fn})}]
+  ;; Start Websocket loop
+  (sente/start-chsk-router! ch-recv ws-handler))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-4">
+<h4 id="orgheadline4">提供的API.</h4>
+<div class="outline-text-4" id="text-orgheadline4">
+<ul class="org-ul">
+<li>dispatch 发送command/dispatch. POST请求到服务器. 响应时同步command的状态.</li>
+<li>fetch 发送query/fetch. GET请求到服务器, 返回查询结果.</li>
+<li>subscribe 发送query/subscribe. GET请求到服务器, 返回查询结果.</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">;; Dispatch Command
+(dispatch stack-publish-&gt;
+  {:stack/content "Clojure is awesome!"
+   :stack/title "Hello"})
+
+;; Fetch Query
+(fetch &lt;-stack-detail
+  {:db/id  10
+   :size   50
+   :author :all})
+
+;; Subscribe Query
+(subscribe &lt;-stack-detail
+  {:db/id  10
+   :size   30
+   :author :all})
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8">CLJ</h3>
+<div class="outline-text-3" id="text-orgheadline8">
+</div><div id="outline-container-orgheadline6" class="outline-4">
+<h4 id="orgheadline6">需要提供的配置.</h4>
+<div class="outline-text-4" id="text-orgheadline6">
+<ul class="org-ul">
+<li>get-handler, 用来对接query/fetch</li>
+<li>post-handler, 用来对接command/dispatch请求.</li>
+<li>ws-send, 用来推送update/push和command/sync.</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(let [{:keys [get-handler post-handler tx-handler sync-command]} (setup {:ws-send ws-send})]
+  (defroute route
+    (GET "/api" get-handler)
+    (POST "/api" post-handler)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-4">
+<h4 id="orgheadline7">回调</h4>
+<div class="outline-text-4" id="text-orgheadline7">
+<ul class="org-ul">
+<li>register-query-handler</li>
+<li>register-command-handler</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(register-query-handler &lt;-stack-detail
+  {:query (fn [env params]
+            ;; do sth
+            {:value xxx}
+            )
+   :query-tx (fn [env params]
+               ;; do sth
+               {:delta xxx}
+               )})
+
+(register-command-handler publish-stack-&gt;
+  (fn [env params]
+    ;; do sth
+    {:status xxx}
+    ))
+
+;; Other Situations.
+(sync-command publish-stack-&gt; :finish)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>]]></description>
+      <pubDate>2016-03-31</pubDate>
+      <guid>https://DogLooksGood.github.io/blog/2016/03/31/thought_for_fast_develop/</guid>
+    </item>
     <item>
       <title>本狗的Docker尝试</title>
       <link>https://DogLooksGood.github.io/blog/2016/02/23/docker</link>
@@ -604,13 +788,6 @@ stackoverflow中的这个方法, 个人觉得比较好.
       <description><![CDATA[Rum的学习笔记]]></description>
       <pubDate>2016-02-22</pubDate>
       <guid>https://DogLooksGood.github.io/blog/2016/02/13/rum</guid>
-    </item>
-    <item>
-      <title>Leiningen 模板的创建</title>
-      <link>https://DogLooksGood.github.io/blog/2016/02/19/lein_template</link>
-      <description><![CDATA[Leiningen 模板创建]]></description>
-      <pubDate>2016-02-22</pubDate>
-      <guid>https://DogLooksGood.github.io/blog/2016/02/19/lein_template</guid>
     </item>
   </channel>
 </rss>
