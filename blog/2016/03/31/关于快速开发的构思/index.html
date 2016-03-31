@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>关于快速开发的构思 - 狗好看の世界</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="DogLooksGood" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <link href="//cdn.bootcss.com/highlight.js/9.1.0/styles/github.min.css" rel="stylesheet">
+  </head>
+
+  <body class="container">
+    <div>
+      <header class="masthead">
+	
+        <img class="avatar" src="/media/img/avatar.png" />
+
+	<div>
+<h1 class="masthead-title"><a href="/">狗好看の世界</a></h1>
+        <p>Less words, more attempting.</p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="https://github.com/DogLooksGood">GitHub</a></li>
+          <!-- <li><a href="/rss.xml">RSS</a></li> -->
+        </ul>
+	</div>
+	
+
+        <!-- <form method="get" id="searchform" action="//www.google.com/search"> -->
+        <!--   <input type="text" class="field" name="q" id="s" placeholder="Search"> -->
+        <!--   <input type="hidden" name="as_sitesearch" value="DogLooksGood.github.io"> -->
+        <!-- </form> -->
+
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>关于快速开发的构思</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline9">API</a>
+<ul>
+<li><a href="#orgheadline2">CLJC</a>
+<ul>
+<li><a href="#orgheadline1">提供的API.</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline5">CLJS</a>
+<ul>
+<li><a href="#orgheadline3">需要提供的配置.</a></li>
+<li><a href="#orgheadline4">提供的API.</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline8">CLJ</a>
+<ul>
+<li><a href="#orgheadline6">需要提供的配置.</a></li>
+<li><a href="#orgheadline7">回调</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline9" class="outline-2">
+<h2 id="orgheadline9">API</h2>
+<div class="outline-text-2" id="text-orgheadline9">
+</div><div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2">CLJC</h3>
+<div class="outline-text-3" id="text-orgheadline2">
+</div><div id="outline-container-orgheadline1" class="outline-4">
+<h4 id="orgheadline1">提供的API.</h4>
+<div class="outline-text-4" id="text-orgheadline1">
+<p>
+<b>defquery</b> 定义query
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defquery &lt;-stack-detail
+  {:db/id        s/Int
+   :size         s/Int
+   :author       s/Keyword})
+</pre>
+</div>
+
+<p>
+<b>defcommand</b> 定义command
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(defcommand publish-stack-&gt;
+  {:stack/content       s/Str
+   :stack/title         s/Str})
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5">CLJS</h3>
+<div class="outline-text-3" id="text-orgheadline5">
+</div><div id="outline-container-orgheadline3" class="outline-4">
+<h4 id="orgheadline3">需要提供的配置.</h4>
+<div class="outline-text-4" id="text-orgheadline3">
+<ul class="org-ul">
+<li>get, 用来发送query/fetch, query/subscribe请求.</li>
+<li>post, 用来发送command/dispatch请求.</li>
+<li>ws-handler, 用来处理update/push, command/sync.</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(let [{:keys [ws-handler] (setup {:get get-fn :post post-fn})}]
+  ;; Start Websocket loop
+  (sente/start-chsk-router! ch-recv ws-handler))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-4">
+<h4 id="orgheadline4">提供的API.</h4>
+<div class="outline-text-4" id="text-orgheadline4">
+<ul class="org-ul">
+<li>dispatch 发送command/dispatch. POST请求到服务器. 响应时同步command的状态.</li>
+<li>fetch 发送query/fetch. GET请求到服务器, 返回查询结果.</li>
+<li>subscribe 发送query/subscribe. GET请求到服务器, 返回查询结果.</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">;; Dispatch Command
+(dispatch publish-stack-&gt;
+  {:stack/content "Clojure is awesome!"
+   :stack/title "Hello"})
+
+;; Fetch Query
+(fetch &lt;-stack-detail
+  {:db/id  10
+   :size   50
+   :author :all})
+
+;; Subscribe Query
+(subscribe &lt;-stack-detail
+  {:db/id  10
+   :size   30
+   :author :all})
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8">CLJ</h3>
+<div class="outline-text-3" id="text-orgheadline8">
+</div><div id="outline-container-orgheadline6" class="outline-4">
+<h4 id="orgheadline6">需要提供的配置.</h4>
+<div class="outline-text-4" id="text-orgheadline6">
+<ul class="org-ul">
+<li>get-handler, 用来对接query/fetch</li>
+<li>post-handler, 用来对接command/dispatch请求.</li>
+<li>ws-send, 用来推送update/push和command/sync.</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(let [{:keys [get-handler post-handler tx-handler sync-command]} (setup {:ws-send ws-send})]
+  (defroute route
+    (GET "/api" get-handler)
+    (POST "/api" post-handler)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-4">
+<h4 id="orgheadline7">回调</h4>
+<div class="outline-text-4" id="text-orgheadline7">
+<ul class="org-ul">
+<li>register-query-handler</li>
+<li>register-command-handler</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(register-query-handler &lt;-stack-detail
+  {:query (fn [env params]
+            ;; do sth
+            {:value xxx}
+            )
+   :query-tx (fn [env params]
+               ;; do sth
+               {:delta xxx}
+               )})
+
+(register-command-handler publish-stack-&gt;
+  (fn [env params]
+    ;; do sth
+    {:status xxx}
+    ))
+
+;; Other Situations.
+(sync-command publish-stack-&gt; :finish)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-03-31</span>
+        <span title="last modification date" class="post-info">2016-03-31</span>
+        <span title="tags" class="post-info"><a href="/tags/clojure/">clojure</a></span>
+        <span title="author" class="post-info">DogLooksGood</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'DogLooksGood'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="//code.jquery.com/jquery-latest.min.js"></script>
+      <script src="//cdn.bootcss.com/highlight.js/9.1.0/highlight.min.js"></script>
+      <script src="//cdn.bootcss.com/highlight.js/9.1.0/languages/clojure.min.js"></script>
+      <script src="//cdn.bootcss.com/highlight.js/9.1.0/languages/clojure-repl.min.js"></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.x (<a href="http://orgmode.org">Org mode</a> 8.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:DogLooksGood@doglooksgood.local">DogLooksGood</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>
