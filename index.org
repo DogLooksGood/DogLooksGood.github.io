@@ -4,7 +4,7 @@
 浑浑噩噩这么久终于要开始写博客啦!
 
 ** 友情链接
-[[https://halleytl.github.io][来自铁岭的逗比]]
-[[http://zhangbowen.github.io/][自以为是大哥的小弟]]
+- [[https://halleytl.github.io][来自铁岭的逗比]]
+- [[http://zhangbowen.github.io/][自以为是大哥的小弟]]
 
 
